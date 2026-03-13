@@ -1,37 +1,113 @@
 {% extends 'customer/master_customer.html' %}
 {% load static %}
 
-{% block title %}
-<title>Your Cart</title>
-<link rel="stylesheet" href="{% static 'style/product_details_style.css' %}">
-
-{% endblock %}
-
 {% block content %}
+<style>
+    body { font-family: 'Outfit', sans-serif; background: #fcfdfc; color: #1e293b; }
+    .serif-title { font-family: 'Fraunces', serif; }
+    .detail-card {
+        background: #ffffff;
+        border-radius: 3rem;
+        border: 1px solid rgba(6, 95, 70, 0.05);
+        box-shadow: 0 40px 100px -20px rgba(6, 78, 59, 0.08);
+    }
+    .product-image-container {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        border-radius: 2.5rem;
+    }
+    .promo-tag { background: linear-gradient(90deg, #065f46, #10b981); }
+</style>
 
-<div class="card">
-    <form method="POST">
-        {% csrf_token %}
-        <div class="row g-0 main_div">
-            <div class="col-lg-6 image_div">
-                <img src="{{ product.p_image.url }}" class="img-fluid rounded-start" alt="..." width="280px">
-            </div>
-            <div class="col-lg-6">
-                <div class="card-body">
-                    <span>{{ msg }}</span>
-                    <h5 class="card-title">{{ product.p_name }}</h5>
-                    <p class="card-text">{{ product.p_description }}</p>
-                    <h4>MRP ₹{{product.p_price}} &nbsp; <h4> <strike>₹1200</strike> (25% OFF)</h4>
-                    </h4>
-                    <p id="tax_p">Inclusive of all Taxes</p>
-                    <button id="cart_button" type="submit" class="btn btn-danger"><i
-                            class="fa-sharp fa-solid fa-bag-shopping" style="color: #ffffff;"></i>Cart</button>
-                    <button class="btn btn-outline-success" type="button"><i class="fa-regular fa-heart"></i>Wishlist</button>
+<main class="max-w-7xl mx-auto px-6 lg:px-12 py-24">
+    <nav class="flex items-center gap-4 mb-12">
+        <a href="{% url 'customer:cust_view_prod' %}" class="text-[10px] font-bold uppercase tracking-[4px] text-slate-400 hover:text-emerald-600 transition-all">Catalog</a>
+        <i class="bi bi-chevron-right text-[8px] text-slate-300"></i>
+        <span class="text-[10px] font-bold uppercase tracking-[4px] text-emerald-600">{{ product.p_name }}</span>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+        
+        <div class="lg:col-span-6">
+            <div class="product-image-container p-12 lg:p-20 relative overflow-hidden group">
+                {% if product.best_seller == 'Yes' %}
+                <div class="absolute top-8 left-8 z-10">
+                    <div class="promo-tag text-white text-[10px] font-bold uppercase tracking-[3px] px-5 py-2.5 rounded-full shadow-xl">
+                        Best Seller Selection
+                    </div>
                 </div>
+                {% endif %}
+                
+                {% if product.p_image %}
+                    <img src="{{ product.p_image.url }}" alt="{{ product.p_name }}" class="w-full h-auto rounded-2xl shadow-2xl transition-transform duration-700 hover:scale-105">
+                {% else %}
+                    <div class="w-full aspect-[3/4] bg-slate-200 flex items-center justify-center rounded-2xl">
+                        <i class="bi bi-book text-6xl text-slate-400"></i>
+                    </div>
+                {% endif %}
             </div>
         </div>
 
-    </form>
-</div>
+        <div class="lg:col-span-6">
+            <div class="detail-card p-10 lg:p-16">
+                
+                <div class="mb-10">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="flex text-yellow-400 text-xs">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i>
+                        </div>
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Premium Archive Collection</span>
+                    </div>
+                    <h1 class="serif-title text-5xl text-slate-900 leading-tight mb-4">{{ product.p_name|title }}</h1>
+                    <p class="text-xl text-emerald-700 font-medium italic">By {{ product.p_author }}</p>
+                </div>
 
+                <div class="bg-emerald-50/50 rounded-[2rem] p-8 mb-10 border border-emerald-100/50">
+                    <div class="flex items-end gap-4 mb-2">
+                        <span class="brand-font text-5xl font-extrabold text-slate-900">₹{{ product.p_price }}</span>
+                        <span class="text-emerald-600/40 text-lg font-medium mb-1">Tax Included</span>
+                    </div>
+                    <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">
+                        <i class="bi bi-shield-check mr-2"></i>Verified Sustainability Edition
+                    </p>
+                </div>
+
+                <div class="space-y-6 mb-12">
+                    <h3 class="text-[11px] font-bold uppercase tracking-[4px] text-slate-400">Synopsis</h3>
+                    <p class="text-slate-600 leading-relaxed text-base font-light">
+                        {{ product.p_description|default:"No description available for this volume." }}
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8 mb-12 py-8 border-y border-slate-100">
+                    <div>
+                        <p class="text-[9px] font-bold text-slate-300 uppercase tracking-[2px] mb-2">Genre</p>
+                        <p class="text-sm font-bold text-slate-800">{{ product.p_genre }}</p>
+                    </div>
+                    <div>
+                        <p class="text-[9px] font-bold text-slate-300 uppercase tracking-[2px] mb-2">Print Year</p>
+                        <p class="text-sm font-bold text-slate-800">{{ product.p_year }}</p>
+                    </div>
+                    <div>
+                        <p class="text-[9px] font-bold text-slate-300 uppercase tracking-[2px] mb-2">Product SKU</p>
+                        <p class="text-sm font-bold text-slate-800">#BK-{{ product.id }}</p>
+                    </div>
+                    <div>
+                        <p class="text-[9px] font-bold text-slate-300 uppercase tracking-[2px] mb-2">Stock Status</p>
+                        <p class="text-sm font-bold text-emerald-600">Available in Archive</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button class="flex-1 bg-[#065f46] text-white py-6 rounded-2xl text-[11px] font-bold uppercase tracking-[4px] shadow-2xl shadow-emerald-900/30 hover:bg-black transition-all transform hover:-translate-y-1">
+                        Request Volume
+                    </button>
+                    <button class="px-10 py-6 border border-slate-200 rounded-2xl text-slate-400 hover:text-emerald-600 hover:border-emerald-200 transition-all">
+                        <i class="bi bi-bookmark-plus text-xl"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</main>
 {% endblock %}

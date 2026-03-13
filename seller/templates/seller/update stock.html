@@ -2,35 +2,78 @@
 {% load static %}
 
 {% block title %}
-<title>Update Stock</title>
-<link rel="stylesheet" href="{% static 'style/update_stock_style.css' %}">
-
+<title>Ledger Sync | ShopeHub Merchant</title>
 {% endblock %}
 
 {% block content %}
-<h1>UPDATE STOCK</h1><br>
-<div class="container">
-    <form method="POST" id="form_id">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label for="exampleFormControlTextarea1" class="form-label">Product No</label>
-            <select name="p_number" id="product" class="form-control" data-bs-toggle="dropdown" aria-expanded="false">
-                {% for product in products %}
-                <option value="{{product.id}}">{{ product.p_name | title }}</option>
-                {% endfor %}
-            </select>
+<div class="max-w-4xl mx-auto py-10 px-4">
+    
+    <div class="mb-10 flex items-center justify-between">
+        <div>
+            <h1 class="serif-title text-3xl text-slate-900">Inventory Ledger</h1>
+            <p class="text-slate-400 text-[10px] font-black uppercase tracking-[3px] mt-1">Manual Stock Synchronization Protocol</p>
         </div>
-        <div class="mb-3">
-            <label for="exampleFormControlInput1" class="form-label">Current Stock</label>
-            <input type="text" class="form-control" id="stock_field" name="p_category">
+        <div class="h-12 w-12 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-600 shadow-sm">
+            <i class="bi bi-arrow-repeat text-xl animate-spin-slow"></i>
         </div>
-        <div class="mb-3">
-            <label for="exampleFormControlInput1" class="form-label">New Stock</label>
-            <input type="number" class="form-control" id="categoryField" name="new_stock" min="1">
+    </div>
+
+    <div class="bg-white rounded-[3rem] shadow-2xl shadow-purple-900/5 border border-purple-50 overflow-hidden">
+        <form method="POST" id="form_id">
+            {% csrf_token %}
+            
+            <div class="p-8 lg:p-12">
+                <div class="group space-y-3 mb-10">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 group-focus-within:text-purple-600 transition-colors">Select Volume from Archive</label>
+                    <div class="relative">
+                        <select name="p_number" id="product" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-600 transition-all text-sm font-bold appearance-none cursor-pointer">
+                            <option value="" disabled selected>Search Collection...</option>
+                            {% for product in products %}
+                            <option value="{{product.id}}">{{ product.p_name | title }}</option>
+                            {% endfor %}
+                        </select>
+                        <i class="bi bi-chevron-down absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                    <div class="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 group transition-all hover:bg-white hover:border-purple-100 hover:shadow-xl hover:shadow-purple-900/5">
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Current Verified Stock</p>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-slate-400 border border-slate-100 shadow-sm">
+                                <i class="bi bi-box-seam"></i>
+                            </div>
+                            <input type="text" class="bg-transparent border-none text-2xl font-black text-slate-800 w-full outline-none" id="stock_field" name="p_category" readonly placeholder="--">
+                        </div>
+                    </div>
+
+                    <div class="p-8 bg-purple-50/30 rounded-[2rem] border border-purple-100 group transition-all hover:bg-white hover:shadow-xl hover:shadow-purple-900/5">
+                        <p class="text-[9px] font-black text-purple-600 uppercase tracking-widest mb-4">Proposed New Stock</p>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-purple-200">
+                                <i class="bi bi-plus-lg"></i>
+                            </div>
+                            <input type="number" class="bg-transparent border-none text-2xl font-black text-purple-700 w-full outline-none placeholder:text-purple-200" id="categoryField" name="new_stock" min="1" placeholder="00">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-6 bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-[4px] shadow-xl hover:bg-purple-600 transition-all transform hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-3">
+                    <i class="bi bi-shield-lock"></i> Authorize Ledger Update
+                </button>
+            </div>
+        </form>
+
+        <div class="bg-slate-50/80 p-6 text-center border-t border-slate-50">
+            <div class="flex items-center justify-center gap-3 text-[9px] font-bold text-slate-400 uppercase tracking-[2px]">
+                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                Secure End-to-End Encryption Enabled
+            </div>
         </div>
-        <button type="submit" class="btn btn-success">Update</button>
-    </form>
+    </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.4.js"></script>
 <script>
     $(document).ready(function () {
         $.ajaxSetup({
@@ -40,24 +83,35 @@
         })
 
         $('#product').change(function () {
+            // Visual feedback on select
+            $(this).parent().addClass('scale-[1.02]');
+            setTimeout(() => $(this).parent().removeClass('scale-[1.02]'), 200);
 
             $.ajax({
-
                 type: 'POST',
                 url: "{% url 'seller:stock_update' %}",
                 data: {
                     'product_id': $(this).val()
                 },
-
-
                 success: function (response) {
-
                     let res = response.stock
-                    $('#stock_field').val(res)
+                    $('#stock_field').val(res + " Units");
+                    // Animate the value change
+                    $('#stock_field').addClass('animate-pulse text-purple-600');
+                    setTimeout(() => $('#stock_field').removeClass('animate-pulse text-purple-600'), 1000);
                 }
             })
         })
     })
-
 </script>
+
+<style>
+    @keyframes spin-slow {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    .animate-spin-slow {
+        animation: spin-slow 8s linear infinite;
+    }
+</style>
 {% endblock %}

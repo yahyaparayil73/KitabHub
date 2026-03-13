@@ -1,35 +1,88 @@
 {% extends 'customer/master_customer.html' %}
 {% load static %}
 
-{% block title %}
-<title>Customer Profile</title>
-<link rel="stylesheet" href="{% static 'style/cust_profile.css' %}">
-{% endblock %}
+{% block title %}Member Dossier | KitabHub{% endblock %}
 
 {% block content %}
+<div class="min-h-[90vh] flex items-center justify-center px-6 py-20 relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-full h-full opacity-[0.03] pointer-events-none">
+        <i class="bi bi-book-half text-[40rem] absolute -top-40 -left-20 rotate-12"></i>
+    </div>
 
-<div class="container">
-    <h1>CUSTOMER PROFILE</h1>
-    <p>Enter your profile details </p>
+    <div class="w-full max-w-2xl relative z-10">
+        <div class="bg-white rounded-[3rem] shadow-2xl border border-emerald-50 overflow-hidden">
+            
+            <div class="bg-[#064e3b] p-12 text-center relative">
+                <div class="absolute top-0 left-0 w-full h-full opacity-10">
+                    <div class="grid grid-cols-6 gap-2 p-4">
+                        {% for i in "123456" %}<div class="h-20 bg-white rounded-lg"></div>{% endfor %}
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <div class="w-24 h-24 bg-emerald-500 rounded-3xl flex items-center justify-center mx-auto mb-6 rotate-3 shadow-2xl border-4 border-[#064e3b]">
+                        <span class="text-white text-4xl font-black brand-font">{{ customer_profile.c_name|slice:":1"|upper }}</span>
+                    </div>
+                    <h1 class="serif-title text-3xl text-white">{{ customer_profile.c_name|title }}</h1>
+                    <p class="text-emerald-300 text-[10px] font-bold uppercase tracking-[4px] mt-2">Verified Resident Reader</p>
+                </div>
+            </div>
 
-    <div id="main_div">
-        <div>
-            <label for="inputEmail4" class="form-label">Name</label>
-            <input type="text" class="form-control" id="inputEmail4" name="customer_name"
-                value="{{ customer_profile.c_name | title}}" readonly>
+            <div class="p-12">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-[3px] ml-1">Legal Designation</label>
+                        <div class="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex items-center gap-4">
+                            <i class="bi bi-person text-emerald-600"></i>
+                            <span class="text-sm font-semibold text-slate-700">{{ customer_profile.c_name|title }}</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-[3px] ml-1">Digital Correspondence</label>
+                        <div class="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex items-center gap-4">
+                            <i class="bi bi-envelope-at text-emerald-600"></i>
+                            <span class="text-sm font-semibold text-slate-700">{{ customer_profile.c_email }}</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-[3px] ml-1">Secure Line</label>
+                        <div class="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex items-center gap-4">
+                            <i class="bi bi-phone text-emerald-600"></i>
+                            <span class="text-sm font-semibold text-slate-700">{{ customer_profile.c_mobile }}</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-[3px] ml-1">Account Tier</label>
+                        <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl flex items-center gap-4">
+                            <i class="bi bi-patch-check-fill text-emerald-500"></i>
+                            <span class="text-[10px] font-black text-emerald-800 uppercase tracking-widest">Premium Member</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="my-10 h-[1px] bg-slate-100"></div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="#" class="flex-1 bg-[#064e3b] text-white py-5 rounded-2xl font-bold text-[10px] uppercase tracking-[3px] text-center shadow-xl hover:bg-black transition-all group no-underline">
+                        <i class="bi bi-pencil-square me-2 group-hover:scale-125 transition-transform"></i> Modify Dossier
+                    </a>
+                    <a href="{% url 'customer:changepassword' %}" class="flex-1 bg-white text-slate-700 border border-slate-200 py-5 rounded-2xl font-bold text-[10px] uppercase tracking-[3px] text-center hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all group no-underline">
+                        <i class="bi bi-shield-lock me-2"></i> Security Protocol
+                    </a>
+                </div>
+            </div>
+
+            <div class="bg-slate-50/50 p-6 text-center border-t border-slate-100">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-[2px]">
+                    <i class="bi bi-info-circle me-1"></i> Data managed under KitabHub Privacy Protocol 2026
+                </p>
+            </div>
         </div>
-        <div>
-            <label for="inputPassword4" class="form-label">Mobile Number</label>
-            <input type="text" class="form-control" id="inputPassword4" name="customer_mobile"
-                value="{{ customer_profile.c_mobile }}" readonly>
-        </div>
-        <div>
-            <label for="inputEmail4" class="form-label">Email</label>
-            <input type="text" class="form-control" id="inputEmail4" name="customer_phone"
-                value="{{ customer_profile.c_email }}" readonly>
-        </div><br>
-        <a><button class="btn btn-success">Update Profile</button></a>
-        <a href="{% url 'customer:changepassword' %}"><button class="btn btn-danger">Change Password</button></a>
     </div>
 </div>
 {% endblock %}

@@ -1,0 +1,112 @@
+{% extends 'ecom_admin/admin_master.html' %}
+{% load static %}
+
+{% block title %}
+<title>User Registry | Root Terminal</title>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    
+    <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+        <div>
+            <h1 class="serif-title text-4xl text-slate-900 tracking-tight">User Registry</h1>
+            <p class="text-slate-400 text-[10px] font-black uppercase tracking-[4px] mt-2">Database of Verified Consumers</p>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <div class="bg-white px-6 py-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                <span class="text-[10px] font-black text-slate-800 uppercase tracking-widest">{{ customers.count }} Active Users</span>
+            </div>
+            <button class="p-3 bg-black text-white rounded-xl hover:bg-slate-800 transition-all">
+                <i class="bi bi-download"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/40 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/50 border-b border-slate-100">
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">User ID</th>
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Full Identity</th>
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact Access</th>
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Postal Address</th>
+                        <th class="px-8 py-6 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Operations</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    {% for customer in customers %}
+                    <tr class="hover:bg-slate-50/30 transition-all group">
+                        <td class="px-8 py-6">
+                            <span class="text-xs font-mono font-bold text-slate-400">#CU-{{ customer.id }}</span>
+                        </td>
+                        
+                        <td class="px-8 py-6">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white text-xs font-black shadow-lg">
+                                    {{ customer.c_name|slice:":1"|upper }}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-black text-slate-900 leading-tight">{{ customer.c_name|title }}</p>
+                                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Verified Account</p>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="px-8 py-6">
+                            <div class="space-y-1">
+                                <p class="text-[11px] font-bold text-slate-600 truncate max-w-[180px]">
+                                    <i class="bi bi-envelope-at mr-2 text-slate-300"></i>{{ customer.c_email }}
+                                </p>
+                                <p class="text-[11px] font-bold text-slate-600">
+                                    <i class="bi bi-phone mr-2 text-slate-300"></i>+91 {{ customer.c_mobile }}
+                                </p>
+                            </div>
+                        </td>
+
+                        <td class="px-8 py-6">
+                            <div class="max-w-[220px]">
+                                <p class="text-xs font-medium text-slate-500 leading-relaxed truncate group-hover:whitespace-normal transition-all">
+                                    {{ customer.c_address|title }}
+                                </p>
+                            </div>
+                        </td>
+
+                        <td class="px-8 py-6 text-right">
+                            <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                                <button class="p-2.5 bg-slate-50 text-slate-400 hover:text-black hover:bg-slate-200 rounded-xl transition-all" title="Order History">
+                                    <i class="bi bi-clock-history"></i>
+                                </button>
+                                <a href="{% url 'ecom_admin:remove_customer' customer.id %}" 
+                                   class="p-2.5 bg-slate-50 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                                   onclick="return confirm('WARNING: Are you sure you want to revoke access for this user?')">
+                                    <i class="bi bi-person-dash-fill"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-8 py-24 text-center">
+                            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i class="bi bi-people text-3xl text-slate-200"></i>
+                            </div>
+                            <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest">The Registry is Empty</h3>
+                            <p class="text-[10px] text-slate-300 mt-2 font-bold uppercase">No user accounts detected in database</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .overflow-x-auto::-webkit-scrollbar { height: 5px; }
+    .overflow-x-auto::-webkit-scrollbar-thumb { background: #000; border-radius: 10px; }
+</style>
+{% endblock %}

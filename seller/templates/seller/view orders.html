@@ -1,0 +1,124 @@
+{% extends 'seller/master_seller.html' %}
+{% load static %}
+
+{% block title %}
+<title>Order Dispatch | ShopeHub Merchant</title>
+<style>
+    .order-row {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .order-row:hover {
+        background-color: #f8fafc;
+        transform: scale(1.005);
+    }
+    .status-pill {
+        padding: 6px 12px;
+        border-radius: 12px;
+        font-size: 9px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .status-pending { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
+    .status-shipped { background: #f0f9ff; color: #0369a1; border: 1px solid #e0f2fe; }
+    .status-delivered { background: #ecfdf5; color: #047857; border: 1px solid #d1fae5; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-10 px-4">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
+        <div>
+            <h1 class="serif-title text-3xl text-slate-900">Incoming Requests</h1>
+            <p class="text-slate-400 text-[10px] font-black uppercase tracking-[3px] mt-1">Real-time Order Stream</p>
+        </div>
+        
+        <div class="flex bg-white p-1.5 rounded-2xl shadow-sm border border-slate-100">
+            <button class="px-5 py-2.5 bg-purple-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">All Orders</button>
+            <button class="px-5 py-2.5 text-slate-400 hover:text-purple-600 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">Pending</button>
+            <button class="px-5 py-2.5 text-slate-400 hover:text-purple-600 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">Completed</button>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-[2.5rem] shadow-2xl shadow-purple-900/5 border border-purple-50 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-50">
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Manifest ID</th>
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Volume Details</th>
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Recipient</th>
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Valuation</th>
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                        <th class="px-8 py-6 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Operations</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    {% for order in orders %}
+                    <tr class="order-row">
+                        <td class="px-8 py-6">
+                            <span class="text-xs font-mono font-bold text-slate-400">#SH-{{ order.id|add:1000 }}</span>
+                            <p class="text-[9px] font-bold text-slate-300 uppercase mt-1">{{ order.date|date:"d M, Y" }}</p>
+                        </td>
+                        <td class="px-8 py-6">
+                            <div class="flex items-center gap-4">
+                                <img src="{{ order.product.p_image.url }}" class="w-10 h-14 object-cover rounded-lg shadow-sm">
+                                <div>
+                                    <p class="text-sm font-black text-slate-800 leading-tight">{{ order.product.p_name|title }}</p>
+                                    <p class="text-[10px] font-bold text-purple-500 mt-1 italic">Qty: {{ order.quantity }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-8 py-6">
+                            <p class="text-xs font-bold text-slate-700">{{ order.customer_name }}</p>
+                            <p class="text-[10px] text-slate-400 font-medium">{{ order.shipping_city }}</p>
+                        </td>
+                        <td class="px-8 py-6">
+                            <span class="text-sm font-black text-slate-900">₹ {{ order.total_price }}</span>
+                            <p class="text-[9px] font-bold text-emerald-500 uppercase tracking-tighter">Paid via UPI</p>
+                        </td>
+                        <td class="px-8 py-6">
+                            {% if order.status == 'Pending' %}
+                                <span class="status-pill status-pending">Awaiting Dispatch</span>
+                            {% elif order.status == 'Shipped' %}
+                                <span class="status-pill status-shipped">In Transit</span>
+                            {% else %}
+                                <span class="status-pill status-delivered">Fulfilled</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-8 py-6 text-right">
+                            <div class="flex justify-end gap-2">
+                                <button class="p-2.5 bg-slate-50 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all shadow-sm" title="Print Invoice">
+                                    <i class="bi bi-printer"></i>
+                                </button>
+                                <button class="p-2.5 bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all shadow-sm" title="Update Status">
+                                    <i class="bi bi-truck"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-8 py-20 text-center">
+                            <div class="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="bi bi-inbox text-3xl text-slate-200"></i>
+                            </div>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">The Archive is quiet. No orders yet.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="bg-slate-50/50 p-6 border-t border-slate-50 flex justify-between items-center">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Showing {{ orders.count }} Total Manifests</p>
+            <div class="flex gap-2">
+                <button class="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:bg-purple-600 hover:text-white transition-all"><i class="bi bi-chevron-left text-[10px]"></i></button>
+                <button class="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:bg-purple-600 hover:text-white transition-all"><i class="bi bi-chevron-right text-[10px]"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

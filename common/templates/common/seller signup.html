@@ -1,61 +1,57 @@
 {% extends 'common/master_common.html' %}
-{% load static %}
-{% block title %}
-<title>Seller Registration</title>
-<link rel="stylesheet" href="{% static 'style/seller_signup_style.css' %}">
-{% endblock %}
-
-
 {% block content %}
-<div>
-    <div class="container">
-        <h1>
-            SELLER REGISTRATION
-        </h1>
-        <form action="" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{message}}
+<main class="min-h-screen flex items-center justify-center p-6 lg:p-12 bg-[#f8fafc]">
+    <div class="w-full max-w-[1200px] grid grid-cols-1 lg:grid-cols-2 bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-slate-100">
+        
+        <div class="bg-[#1e1b4b] p-16 text-white flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full"></div>
             <div>
-                <label for="input_name">Your Name</label>
-                <input type="text" class="form-control" id="input_name" placeholder="Enter Your Name" name="seller_name">
+                <span class="text-indigo-400 font-bold text-[10px] tracking-[4px] uppercase mb-4 block">Merchant Portal</span>
+                <h2 class="serif-title text-5xl leading-tight">Partner with <br><span class="italic text-indigo-200">KitabHub.</span></h2>
+                <p class="mt-6 text-indigo-100/60 text-sm font-light leading-relaxed max-w-xs">
+                    List your volumes in the world's most curated digital archive and reach collectors globally.
+                </p>
             </div>
-            <div>
-                <label for="input_mobile" class="form-label">Your Mobile Number</label>
-                <input type="number" class="form-control" id="input_mobile" placeholder="Enter Your Mobile Number" name="seller_mobile">
+            <div class="space-y-4">
+                <div class="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-indigo-300">
+                    <i class="bi bi-patch-check"></i> Verified Merchant Status
+                </div>
+                <div class="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-indigo-300">
+                    <i class="bi bi-graph-up-arrow"></i> Real-time Analytics
+                </div>
             </div>
-            <div>
-                <label for="inputEmail4" class="form-label">Email</label>
-                <input type="email" class="form-control" id="inputEmail" placeholder="Enter your E-mail Address" name="seller_email">
-            </div>
-            <div>
-                <label for="inputEmail4" class="form-label">address</label>
-                <input type="text" class="form-control" id="inputEmail" placeholder="Enter your Address" name="seller_address">
-            </div>
-            <div>
-                <label for="input_bank_name">Bank Name</label>
-                <input type="text" class="form-control" id="input_bank_name" placeholder="Enter Your Bank Name" name="seller_bank_name">
-            </div>
-            <div>
-                <label for="acc_name">Account Number</label>
-                <input type="number" class="form-control" id="account_number" placeholder="Enter Your Account Number" name="seller_account_number">
-            </div>
-            <div>
-                <label for="input_branch" class="form-label">Bank Branch</label>
-                <input type="text" class="form-control" id="input_branch" placeholder="Enter Your bank branch" name="seller_bank_branch">
-            </div>
-            <div>
-                <label for="input_ifsc" class="form-label">ifsc code</label>
-                <input type="text" class="form-control" id="input_ifsc" placeholder="Enter Your ifsc code" name="seller_ifsc">
-            </div><br>
-            <div class="input-group mb-3">
-                <input type="file" class="form-control" id="inputGroupFile02" name="seller_pic">
-                <label class="input-group-text" for="inputGroupFile02">Upload</label>
-            </div>
-            <br>
-            <div>
-                <button type="submit" class="btn btn-success">Sign Up</button>
-            </div><br>
-        </form>
+        </div>
+
+        <div class="p-12 lg:p-20">
+            <h1 class="serif-title text-3xl text-slate-900 mb-8">Seller Registration</h1>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="mb-6 p-4 rounded-xl bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-widest border border-indigo-100">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST" class="space-y-5">
+                {% csrf_token %}
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="text" name="name" placeholder="Full Name" required class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 outline-none focus:border-indigo-500 transition-all text-sm">
+                    <input type="text" name="phone" placeholder="Contact Number" required class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 outline-none focus:border-indigo-500 transition-all text-sm">
+                </div>
+                <input type="text" name="store_name" placeholder="Store Name (e.g., Rare Reads Archive)" required class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 outline-none focus:border-indigo-500 transition-all text-sm">
+                <input type="email" name="email" placeholder="Business Email" required class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 outline-none focus:border-indigo-500 transition-all text-sm">
+                <input type="password" name="password" placeholder="Merchant Password" required class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 outline-none focus:border-indigo-500 transition-all text-sm">
+
+                <button type="submit" class="w-full bg-[#1e1b4b] text-white py-5 rounded-2xl text-[11px] font-bold uppercase tracking-[4px] hover:bg-indigo-900 transition-all shadow-xl shadow-indigo-900/20">
+                    Initialize Merchant Account
+                </button>
+            </form>
+
+            <p class="mt-8 text-center text-xs text-slate-400">
+                Already a partner? <a href="{% url 'common:seller_login' %}" class="text-indigo-600 font-bold uppercase tracking-widest ml-2">Login</a>
+            </p>
+        </div>
     </div>
-</div>
+</main>
 {% endblock %}

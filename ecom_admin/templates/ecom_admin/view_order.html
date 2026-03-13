@@ -1,0 +1,114 @@
+{% extends 'ecom_admin/admin_master.html' %}
+{% load static %}
+
+{% block title %}
+<title>Master Ledger | Root Terminal</title>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start mb-12 gap-8">
+        <div>
+            <h1 class="serif-title text-5xl text-slate-900 tracking-tighter">Master Ledger</h1>
+            <p class="text-slate-400 text-[11px] font-black uppercase tracking-[5px] mt-3">Global Transaction & Payout Oversight</p>
+        </div>
+        
+        <div class="flex gap-4">
+            <div class="bg-black text-white p-6 rounded-[2rem] shadow-2xl shadow-slate-900/20">
+                <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Volume</p>
+                <p class="text-2xl font-black italic">₹ {{ total_gmv|default:"1.2M" }}</p>
+            </div>
+            <div class="bg-white border border-slate-100 p-6 rounded-[2rem] shadow-sm">
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Orders</p>
+                <p class="text-2xl font-black text-slate-900">{{ orders.count }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-[3rem] border border-slate-100 shadow-2xl shadow-slate-200/60 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/80 border-b border-slate-100">
+                        <th class="px-10 py-8 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Order Hash</th>
+                        <th class="px-10 py-8 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Beneficiary (Customer)</th>
+                        <th class="px-10 py-8 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Asset Details</th>
+                        <th class="px-10 py-8 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Transaction Value</th>
+                        <th class="px-10 py-8 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Fullfillment</th>
+                        <th class="px-10 py-8 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Protocol</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    {% for order in orders %}
+                    <tr class="hover:bg-slate-50/50 transition-all group">
+                        <td class="px-10 py-8">
+                            <p class="text-xs font-mono font-bold text-slate-900 tracking-tighter">#TXN-{{ order.id }}</p>
+                            <p class="text-[9px] text-slate-400 font-bold uppercase mt-1">{{ order.o_date|date:"d M, Y" }}</p>
+                        </td>
+
+                        <td class="px-10 py-8">
+                            <p class="text-sm font-black text-slate-900 leading-none mb-1">{{ order.customer.c_name|title }}</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{{ order.customer.c_mobile }}</p>
+                        </td>
+
+                        <td class="px-10 py-8">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center">
+                                    <i class="bi bi-box-seam text-slate-400"></i>
+                                </div>
+                                <div class="max-w-[150px]">
+                                    <p class="text-[11px] font-bold text-slate-800 truncate">{{ order.product.p_name|title }}</p>
+                                    <p class="text-[9px] font-bold text-emerald-600 uppercase">Qty: {{ order.o_quantity }}</p>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="px-10 py-8">
+                            <div class="inline-block">
+                                <p class="text-sm font-black text-slate-900 leading-none mb-1">₹ {{ order.o_total_price }}</p>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-1 h-1 bg-emerald-500 rounded-full"></span>
+                                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Settled via UPI</p>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="px-10 py-8">
+                            {% if order.o_status == 'Delivered' %}
+                                <span class="px-4 py-1.5 bg-emerald-50 text-emerald-600 text-[9px] font-black uppercase tracking-widest rounded-full border border-emerald-100">
+                                    Closed / {{ order.o_status }}
+                                </span>
+                            {% elif order.o_status == 'Cancelled' %}
+                                <span class="px-4 py-1.5 bg-red-50 text-red-600 text-[9px] font-black uppercase tracking-widest rounded-full border border-red-100">
+                                    Void / {{ order.o_status }}
+                                </span>
+                            {% else %}
+                                <span class="px-4 py-1.5 bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest rounded-full animate-pulse">
+                                    In Transit
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-10 py-8 text-right">
+                            <button class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 hover:bg-black hover:text-white transition-all shadow-sm">
+                                <i class="bi bi-arrow-up-right-square"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-10 py-32 text-center">
+                            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i class="bi bi-receipt text-3xl text-slate-200"></i>
+                            </div>
+                            <p class="text-xs font-black text-slate-400 uppercase tracking-widest">No transaction logs available</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

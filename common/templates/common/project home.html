@@ -7,50 +7,418 @@
 
 {% block content %}
 
-<div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
-    <div class="carousel-inner">
-        <div class="carousel-item active carousel_div">
-            <img src="{% static 'images/man-sunglasses-with-sale-sign.jpg' %}" class="d-block w-100" alt="...">
-            <div class="carousel-caption d-md-block">
-                <h5>Fashion Sale</h5>
-                <h1>Minimal Menz Style</h1>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing <br> elit. Veritatis quod, soluta veniam
-                    blanditiis rem <br> quia sint in facere tenetur. Totam cum ducimus nam. <br>
-                    <a href=""><button class="btn outline">Shop Now</button></a>
-            </div>
-        </div>
-        <div class="carousel-item carousel_div" id="carousel_div_2_id">
-            <img src="{% static 'images/man-floating-with-shopping-bags.jpg' %}" class="d-block w-100" alt="...">
-            <div class="carousel-caption d-md-block">
-                <h5>Fashion Sale</h5>
-                <h1>Minimal Menz Style</h1>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing <br> elit. Veritatis quod, soluta veniam
-                    blanditiis rem <br> quia sint in facere tenetur. Totam cum ducimus nam. <br>
-                    <a href=""><button class="btn outline">Shop Now</button></a>
-            </div>
-        </div>
-        <div class="carousel-item carousel_div" id="carousel_div_3_id">
-            <img src="{% static 'images/expressive-young-woman-posing.jpg' %}" class="d-block w-100" alt="...">
-            <div class="carousel-caption d-md-block">
-                <h5>Fashion Sale</h5>
-                <h1>Minimal Menz Style</h1>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing <br> elit. Veritatis quod, soluta veniam
-                    blanditiis rem <br> quia sint in facere tenetur. Totam cum ducimus nam. <br>
-                    <a href=""><button class="btn outline">Shop Now</button></a>
+<!-- Hero Section -->
+<section class="relative bg-light-bg overflow-hidden min-h-[500px] flex items-center">
+    <div class="absolute inset-0 bg-eco-green opacity-5"></div>
+    <div
+        class="absolute -right-20 -top-20 w-96 h-96 bg-leaf rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob">
+    </div>
+    <div
+        class="absolute -left-20 top-20 w-72 h-72 bg-forest rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000">
+    </div>
+
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="max-w-3xl">
+            <h1 class="text-5xl md:text-6xl font-extrabold text-forest mb-6 tracking-tight leading-tight">
+                Discover the Magic of <br><span class="text-eco-green">Reading Naturally</span>.
+            </h1>
+            <p class="text-xl text-earth mb-8 leading-relaxed max-w-2xl">
+                Dive into a curated world of books designed for the eco-conscious reader. Every page is a step towards a
+                greener imagination.
+            </p>
+            <div class="flex gap-4">
+                <a href="#featured"
+                    class="px-8 py-3 bg-eco-green text-white font-semibold rounded-full hover:bg-forest hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                    Explore Books
+                </a>
+                <a href="{% url 'common:customer_login' %}"
+                    class="px-8 py-3 border-2 border-eco-green text-forest font-semibold rounded-full hover:bg-eco-green hover:text-white hover:shadow-lg transition-all duration-300">
+                    Join the Club
+                </a>
             </div>
         </div>
     </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying"
-        data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleAutoplaying"
-        data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-    </button>
-</div>
+</section>
 
+<!-- Featured Books Section -->
+<section id="featured" class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-forest mb-4">Trending Reads</h2>
+            <div class="w-24 h-1 bg-leaf mx-auto rounded-full"></div>
+            <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Handpicked selections guaranteed to nurture your mind and
+                spirit.</p>
+        </div>
 
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {% for product in prdct %}
+            <!-- Book Card -->
+            <div
+                class="group relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-full">
+                <!-- Image Container -->
+                <div class="relative h-72 overflow-hidden bg-gray-50 flex items-center justify-center p-6">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                    </div>
+                    {% if product.p_image %}
+                    <img src="{{product.p_image.url}}"
+                        class="h-full object-contain group-hover:scale-110 transition-transform duration-500 relative z-0 drop-shadow-xl"
+                        alt="{{product.p_name}}">
+                    {% else %}
+                    <!-- Placeholder Book Cover -->
+                    <div
+                        class="w-32 h-48 bg-gradient-to-br from-eco-green to-forest rounded-r-lg shadow-lg relative ml-4 mb-4 transform -rotate-2 group-hover:rotate-0 transition-transform duration-500">
+                        <div class="absolute left-0 top-0 bottom-0 w-2 bg-black opacity-20"></div>
+                        <div class="p-4 text-white font-serif flex items-center justify-center h-full text-center">
+                            {{product.p_name|truncatechars:20}}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Quick action buttons on hover -->
+                    <div
+                        class="absolute bottom-4 left-0 right-0 flex justify-center gap-3 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-4 transition-all duration-300 z-20">
+                        <button
+                            class="w-10 h-10 rounded-full bg-white text-eco-green flex items-center justify-center hover:bg-eco-green hover:text-white shadow-lg transition-colors">
+                            <i class="fa-solid fa-heart"></i>
+                        </button>
+                        <button
+                            class="w-10 h-10 rounded-full bg-white text-eco-green flex items-center justify-center hover:bg-eco-green hover:text-white shadow-lg transition-colors">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="p-6 flex-grow flex flex-col justify-between relative bg-white z-10">
+                    <div>
+                        <div class="text-xs font-semibold tracking-wider text-leaf uppercase mb-2">Book</div>
+                        <h3
+                            class="text-lg font-bold text-gray-900 mb-2 line-clamp-1 group-hover:text-eco-green transition-colors">
+                            {{product.p_name}}</h3>
+                        <p class="text-sm text-gray-500 mb-4 line-clamp-2">By Author</p>
+                    </div>
+
+                    <div class="flex items-center justify-between mt-auto">
+                        <span class="text-2xl font-bold text-forest">₹{{product.p_price}}</span>
+                        <a href="{% url 'common:customer_login' %}"
+                            class="w-10 h-10 rounded-full bg-light-bg text-eco-green flex items-center justify-center group-hover:bg-eco-green group-hover:text-white transition-colors duration-300">
+                            <i class="fa-solid fa-plus"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Dummy Books if no DB products yet -->
+            {% if not prdct %}
+            <!-- Dummy Book 1 -->
+            <div
+                class="group relative bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-full transform hover:-translate-y-2">
+                <div
+                    class="relative h-72 overflow-hidden bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-6">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-forest/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                    </div>
+                    <div
+                        class="w-36 h-52 bg-gradient-to-br from-eco-green to-forest rounded-r-lg shadow-[5px_5px_15px_rgba(0,0,0,0.3)] relative transform -rotate-3 group-hover:rotate-0 group-hover:scale-105 transition-all duration-500">
+                        <div class="absolute inset-y-0 left-0 w-3 bg-black/20 rounded-l-sm"></div>
+                        <div class="absolute inset-y-0 left-3 w-px bg-white/20"></div>
+                        <div class="p-4 pt-8 text-white h-full flex flex-col justify-between">
+                            <div
+                                class="font-serif text-lg font-bold leading-tight uppercase tracking-wide border-b border-white/30 pb-2">
+                                The Hidden<br>Life of Trees</div>
+                            <div class="text-xs opacity-80 text-center uppercase tracking-widest">Peter Wohlleben</div>
+                        </div>
+                    </div>
+                    <div
+                        class="absolute bottom-6 left-0 right-0 flex justify-center gap-3 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-4 transition-all duration-300 z-20">
+                        <a href="#"
+                            class="px-6 py-2 bg-white text-forest font-bold rounded-full hover:bg-leaf hover:text-white shadow-lg transition-colors text-sm">Add
+                            to Cart</a>
+                    </div>
+                </div>
+                <div class="p-6 flex-grow flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span
+                                class="text-xs font-semibold tracking-wider text-leaf border border-leaf px-2 py-1 rounded-full uppercase">Nature</span>
+                            <div class="flex text-amber-400 text-xs">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                                    class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                                    class="fa-solid fa-star-half-stroke"></i>
+                            </div>
+                        </div>
+                        <h3
+                            class="text-xl font-bold text-gray-900 mb-1 leading-tight group-hover:text-eco-green transition-colors">
+                            The Hidden Life of Trees</h3>
+                        <p class="text-sm text-gray-500 mb-4 font-medium">Peter Wohlleben</p>
+                    </div>
+                    <div class="flex items-end justify-between mt-auto">
+                        <div>
+                            <span class="text-xs text-gray-400 line-through block mb-1">₹899</span>
+                            <span class="text-2xl font-bold text-forest">₹599</span>
+                        </div>
+                        <button
+                            class="w-10 h-10 rounded-full bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors duration-300">
+                            <i class="fa-solid fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dummy Book 2 -->
+            <div
+                class="group relative bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-full transform hover:-translate-y-2">
+                <div
+                    class="relative h-72 overflow-hidden bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center p-6">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-earth/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                    </div>
+                    <div
+                        class="w-36 h-52 bg-gradient-to-br from-earth to-[#5d4037] rounded-r-lg shadow-[5px_5px_15px_rgba(0,0,0,0.3)] relative transform rotate-2 group-hover:rotate-0 group-hover:scale-105 transition-all duration-500">
+                        <div class="absolute inset-y-0 left-0 w-3 bg-black/30 rounded-l-sm"></div>
+                        <div class="absolute inset-y-0 left-3 w-px bg-white/20"></div>
+                        <div class="absolute top-4 right-4 text-white/20 text-4xl"><i
+                                class="fa-brands fa-pagelines"></i></div>
+                        <div class="p-4 pt-12 text-white h-full flex flex-col justify-end">
+                            <div class="font-serif text-lg font-bold leading-tight uppercase tracking-wide">
+                                Silent<br>Spring</div>
+                            <div
+                                class="text-[10px] mt-4 opacity-80 uppercase tracking-widest border-t border-white/30 pt-2">
+                                Rachel Carson</div>
+                        </div>
+                    </div>
+                    <div
+                        class="absolute bottom-6 left-0 right-0 flex justify-center gap-3 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-4 transition-all duration-300 z-20">
+                        <a href="#"
+                            class="px-6 py-2 bg-white text-earth font-bold rounded-full hover:bg-[#8d6e63] hover:text-white shadow-lg transition-colors text-sm">Add
+                            to Cart</a>
+                    </div>
+                </div>
+                <div class="p-6 flex-grow flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span
+                                class="text-xs font-semibold tracking-wider text-[#8d6e63] border border-[#8d6e63] px-2 py-1 rounded-full uppercase">Classic</span>
+                            <div class="flex text-amber-400 text-xs">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                                    class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                                    class="fa-solid fa-star"></i>
+                            </div>
+                        </div>
+                        <h3
+                            class="text-xl font-bold text-gray-900 mb-1 leading-tight group-hover:text-earth transition-colors">
+                            Silent Spring</h3>
+                        <p class="text-sm text-gray-500 mb-4 font-medium">Rachel Carson</p>
+                    </div>
+                    <div class="flex items-end justify-between mt-auto">
+                        <div>
+                            <span class="text-2xl font-bold text-earth">₹450</span>
+                        </div>
+                        <button
+                            class="w-10 h-10 rounded-full bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors duration-300">
+                            <i class="fa-solid fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dummy Book 3 -->
+            <div
+                class="group relative bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-full transform hover:-translate-y-2">
+                <div
+                    class="relative h-72 overflow-hidden bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center p-6">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-teal-800/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                    </div>
+                    <div
+                        class="w-36 h-52 bg-gradient-to-br from-teal-700 to-teal-900 rounded-r-lg shadow-[5px_5px_15px_rgba(0,0,0,0.3)] relative transform -rotate-1 group-hover:rotate-0 group-hover:scale-105 transition-all duration-500">
+                        <div class="absolute inset-y-0 left-0 w-3 bg-black/30 rounded-l-sm"></div>
+                        <div class="absolute inset-y-0 left-3 w-px bg-white/20"></div>
+                        <div class="h-full flex flex-col items-center justify-center p-3 text-center">
+                            <div
+                                class="w-12 h-12 rounded-full border border-white/40 flex items-center justify-center mb-3 text-white/80">
+                                <i class="fa-solid fa-leaf"></i>
+                            </div>
+                            <div class="font-serif text-white font-bold leading-tight">Braiding<br>Sweetgrass</div>
+                            <div class="text-[10px] text-white/70 mt-3 uppercase tracking-widest">Robin Wall Kimmerer
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="absolute bottom-6 left-0 right-0 flex justify-center gap-3 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-4 transition-all duration-300 z-20">
+                        <a href="#"
+                            class="px-6 py-2 bg-white text-teal-800 font-bold rounded-full hover:bg-teal-600 hover:text-white shadow-lg transition-colors text-sm">Add
+                            to Cart</a>
+                    </div>
+                </div>
+                <div class="p-6 flex-grow flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span
+                                class="text-xs font-semibold tracking-wider text-teal-600 border border-teal-600 px-2 py-1 rounded-full uppercase">Ecology</span>
+                            <div class="flex text-amber-400 text-xs">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                                    class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                                    class="fa-regular fa-star"></i>
+                            </div>
+                        </div>
+                        <h3
+                            class="text-xl font-bold text-gray-900 mb-1 leading-tight group-hover:text-teal-700 transition-colors">
+                            Braiding Sweetgrass</h3>
+                        <p class="text-sm text-gray-500 mb-4 font-medium">Robin Wall Kimmerer</p>
+                    </div>
+                    <div class="flex items-end justify-between mt-auto">
+                        <div>
+                            <span class="text-xs text-gray-400 line-through block mb-1">₹1200</span>
+                            <span class="text-2xl font-bold text-teal-800">₹950</span>
+                        </div>
+                        <span
+                            class="bg-red-100 text-red-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Sale</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dummy Book 4 -->
+            <div
+                class="group relative bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-full transform hover:-translate-y-2">
+                <div
+                    class="relative h-72 overflow-hidden bg-gradient-to-br from-yellow-50 to-green-50 flex items-center justify-center p-6">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-lime-800/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                    </div>
+                    <div
+                        class="w-36 h-52 bg-[#e6db74] rounded-r-lg shadow-[5px_5px_15px_rgba(0,0,0,0.3)] relative transform rotate-3 group-hover:rotate-0 group-hover:scale-105 transition-all duration-500 overflow-hidden">
+                        <div class="absolute inset-y-0 left-0 w-3 bg-black/10 rounded-l-sm z-10"></div>
+                        <div class="absolute inset-y-0 left-3 w-px bg-white/40 z-10"></div>
+                        <div class="absolute bottom-0 right-0 w-24 h-24 bg-lime-600 rounded-tl-full opacity-20"></div>
+                        <div class="p-4 pt-6 h-full flex flex-col relative z-10">
+                            <div
+                                class="font-serif text-[#272822] text-xl font-black leading-none uppercase text-right tracking-tighter">
+                                THE<br>O&shy;VER<br>STO<br>RY</div>
+                            <div class="text-[9px] text-[#272822]/80 mt-auto uppercase tracking-widest font-bold">
+                                Richard Powers</div>
+                        </div>
+                    </div>
+                    <div
+                        class="absolute bottom-6 left-0 right-0 flex justify-center gap-3 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-4 transition-all duration-300 z-20">
+                        <a href="#"
+                            class="px-6 py-2 bg-white text-lime-800 font-bold rounded-full hover:bg-lime-600 hover:text-white shadow-lg transition-colors text-sm">Add
+                            to Cart</a>
+                    </div>
+                </div>
+                <div class="p-6 flex-grow flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span
+                                class="text-xs font-semibold tracking-wider text-lime-700 border border-lime-700 px-2 py-1 rounded-full uppercase">Fiction</span>
+                            <div class="flex text-amber-400 text-xs">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                                    class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                                    class="fa-solid fa-star"></i>
+                            </div>
+                        </div>
+                        <h3
+                            class="text-xl font-bold text-gray-900 mb-1 leading-tight group-hover:text-lime-700 transition-colors">
+                            The Overstory</h3>
+                        <p class="text-sm text-gray-500 mb-4 font-medium">Richard Powers</p>
+                    </div>
+                    <div class="flex items-end justify-between mt-auto">
+                        <div>
+                            <span class="text-2xl font-bold text-lime-800">₹720</span>
+                        </div>
+                        <div class="flex items-center text-xs text-lime-700 font-medium">
+                            <i class="fa-solid fa-award mr-1"></i> Pulitzer
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</section>
+
+<!-- Additional Information Section / CTA -->
+<section class="py-20 bg-earth relative overflow-hidden">
+    <!-- Decorative background elements -->
+    <div class="absolute w-full h-full inset-0 opacity-10"
+        style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M54.627 0l.83.83-1.66 1.66-.83-.83.83-.83zM5.373 60l-.83-.83 1.66-1.66.83.83-.83.83zM49.627 0l.83.83-1.66 1.66-.83-.83.83-.83zM10.373 60l-.83-.83 1.66-1.66.83.83-.83.83zM44.627 0l.83.83-1.66 1.66-.83-.83.83-.83zM15.373 60l-.83-.83 1.66-1.66.83.83-.83.83zM39.627 0l.83.83-1.66 1.66-.83-.83.83-.83zM20.373 60l-.83-.83 1.66-1.66.83.83-.83.83zM34.627 0l.83.83-1.66 1.66-.83-.83.83-.83zM25.373 60l-.83-.83 1.66-1.66.83.83-.83.83zM29.627 0l.83.83-1.66 1.66-.83-.83.83-.83zM30.373 60l-.83-.83 1.66-1.66.83.83-.83.83zM24.627 0l.83.83-1.66 1.66-.83-.83.83-.83zM35.373 60l-.83-.83 1.66-1.66.83.83-.83.83zM19.627 0l.83.83-1.66 1.66-.83-.83.83-.83zM40.373 60l-.83-.83 1.66-1.66.83.83-.83.83zM14.627 0l.83.83-1.66 1.66-.83-.83.83-.83zM45.373 60l-.83-.83 1.66-1.66.83.83-.83.83zM9.627 0l.83.83-1.66 1.66-.83-.83.83-.83zM50.373 60l-.83-.83 1.66-1.66.83.83-.83.83zM4.627 0l.83.83-1.66 1.66-.83-.83.83-.83zM55.373 60l-.83-.83 1.66-1.66.83.83-.83.83z\' fill=\'%23ffffff\' fill-opacity=\'1\' fill-rule=\'evenodd\'/%3E%3C/svg%3E');">
+    </div>
+
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="flex flex-col lg:flex-row items-center justify-between">
+            <div class="lg:w-1/2 mb-10 lg:mb-0">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Plant a Tree with Every Purchase</h2>
+                <p class="text-earth-light text-white/80 text-lg mb-8 max-w-lg leading-relaxed">
+                    We believe in giving back to nature. For every book you buy, a portion goes toward reforestation
+                    projects around the globe. Read more, heal the planet.
+                </p>
+                <ul class="text-white space-y-3 mb-8">
+                    <li class="flex items-center"><i class="fa-solid fa-check text-leaf mr-3"></i> 100% Recycled
+                        Packaging</li>
+                    <li class="flex items-center"><i class="fa-solid fa-check text-leaf mr-3"></i> Carbon Neutral
+                        Shipping</li>
+                    <li class="flex items-center"><i class="fa-solid fa-check text-leaf mr-3"></i> Supporting Local
+                        Authors</li>
+                </ul>
+            </div>
+
+            <div class="lg:w-5/12">
+                <div class="bg-white p-8 rounded-3xl shadow-2xl relative">
+                    <div
+                        class="absolute -top-6 -right-6 w-16 h-16 bg-leaf text-white rounded-full flex items-center justify-center shadow-lg text-2xl rotate-12">
+                        <i class="fa-solid fa-seedling"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-forest mb-2">Subscribe to our Green Newsletter</h3>
+                    <p class="text-gray-500 mb-6 text-sm">Get eco-tips, book recommendations, and exclusive offers.</p>
+
+                    <form class="space-y-4">
+                        <div>
+                            <input type="email" placeholder="Your email address"
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-eco-green focus:border-transparent transition-all">
+                        </div>
+                        <button type="button"
+                            class="w-full bg-forest text-white py-3 rounded-xl font-bold hover:bg-eco-green transition-colors shadow-md">
+                            Subscribe Now
+                        </button>
+                    </form>
+                    <p class="text-xs text-gray-400 mt-4 text-center">We respect your privacy. No spam, just leaves.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Include FontAwesome for icons if not already in master -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* Add some custom animations for the blobs */
+    @keyframes blob {
+        0% {
+            transform: translate(0px, 0px) scale(1);
+        }
+
+        33% {
+            transform: translate(30px, -50px) scale(1.1);
+        }
+
+        66% {
+            transform: translate(-20px, 20px) scale(0.9);
+        }
+
+        100% {
+            transform: translate(0px, 0px) scale(1);
+        }
+    }
+
+    .animate-blob {
+        animation: blob 7s infinite;
+    }
+
+    .animation-delay-2000 {
+        animation-delay: 2s;
+    }
+</style>
 {% endblock %}

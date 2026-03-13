@@ -1,34 +1,134 @@
 {% extends 'seller/master_seller.html' %}
-{% load static %}
-
-{% block title %}
-<title>Seller Profile</title>
-<link rel="stylesheet" href="{% static 'style/seller_profile.css' %}">
-{% endblock %}
-
 {% block content %}
-<div class="container">
-    <h1>SELLER PROFILE</h1><br>
-    <p>Enter your profile details </p>
+<style>
+    .profile-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid #e2e8f0;
+        border-radius: 2rem;
+    }
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 9px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+</style>
 
-    <div>
-        <img src="{{ seller_profile_data.s_image.url }}" alt="" width="100px">
+<main class="min-h-screen pt-32 pb-20 px-6 lg:px-20 bg-[#f8fafc]">
+    <div class="max-w-5xl mx-auto">
+        
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+            <div>
+                <h1 class="serif-title text-4xl text-slate-900">{{ seller.s_store_name }}</h1>
+                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-[3px] mt-2">Merchant Registry: #KH-{{ seller.id|stringformat:"04d" }}</p>
+            </div>
+            <div class="flex items-center gap-4">
+                {% if seller.is_verified %}
+                    <span class="status-badge bg-emerald-50 text-emerald-600 border border-emerald-100">
+                        <i class="bi bi-patch-check-fill mr-1"></i> Verified Merchant
+                    </span>
+                {% else %}
+                    <span class="status-badge bg-amber-50 text-amber-600 border border-amber-100">
+                        <i class="bi bi-hourglass-split mr-1"></i> Pending Verification
+                    </span>
+                {% endif %}
+                <button class="bg-[#1e1b4b] text-white px-6 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-indigo-900 transition-all">
+                    Edit Profile
+                </button>
+            </div>
+        </div>
 
-    </div><br>
-    <div>
-        <label for="inputEmail4" class="form-label">Name</label>
-        <input type="text" class="form-control" id="inputEmail4" placeholder="Enter your Name"
-            value="{{ seller_profile_data.s_name | title}}" readonly>
-    </div><br>
-    <div>
-        <label for="inputPassword4" class="form-label">Email Address</label>&nbsp;&nbsp;&nbsp;&nbsp;
-        <input type="email" class="form-control" id="inputPassword4" placeholder="Enter your Email"
-            value="{{ seller_profile_data.s_email }}" readonly>
-    </div><br>
-    <div>
-        <label for="inputEmail4" class="form-label">Phone Number</label>&nbsp;&nbsp;&nbsp;
-        <input type="text" class="form-control" id="inputEmail4" placeholder="Enter your Phone Number"
-            value="{{ seller_profile_data.s_mobile }}" readonly>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <div class="md:col-span-2 space-y-8">
+                <div class="profile-card p-10 shadow-sm">
+                    <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-[4px] mb-8">Store Identity Protocol</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Owner Name</label>
+                            <p class="text-sm font-semibold text-slate-800">{{ seller.s_name }}</p>
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Business Email</label>
+                            <p class="text-sm font-semibold text-slate-800">{{ seller.s_email }}</p>
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Contact Protocol</label>
+                            <p class="text-sm font-semibold text-slate-800">{{ seller.s_phone }}</p>
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Archive Member Since</label>
+                            <p class="text-sm font-semibold text-slate-800">{{ seller.created_at|date:"F Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-card p-10 shadow-sm border-l-4 border-l-indigo-500">
+                    <div class="flex justify-between items-center mb-8">
+                        <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-[4px]">Financial Settlement Details</h3>
+                        <i class="bi bi-shield-lock text-indigo-400"></i>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Bank Account</label>
+                            <p class="text-sm font-mono font-bold text-slate-800">
+                                {% if seller.s_bank_account %}{{ seller.s_bank_account }}{% else %}<span class="text-slate-300 italic font-sans">Not Provided</span>{% endif %}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-400 uppercase block mb-1">IFSC Code</label>
+                            <p class="text-sm font-mono font-bold text-slate-800 uppercase">
+                                {% if seller.s_bank_ifsc %}{{ seller.s_bank_ifsc }}{% else %}<span class="text-slate-300 italic font-sans">Not Provided</span>{% endif %}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Branch Name</label>
+                            <p class="text-sm font-semibold text-slate-800">
+                                {% if seller.s_bank_branch %}{{ seller.s_bank_branch }}{% else %}<span class="text-slate-300 italic font-sans">Not Provided</span>{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-[#1e1b4b] rounded-[2rem] p-8 text-white">
+                    <p class="text-[9px] font-bold uppercase tracking-[3px] text-indigo-300 mb-6">Settlement Currency</p>
+                    <h2 class="text-3xl font-bold mb-1">INR</h2>
+                    <p class="text-[10px] text-indigo-100/50">All payments are settled in Indian Rupees.</p>
+                    
+                    <div class="mt-8 pt-8 border-t border-indigo-500/30">
+                        <div class="flex justify-between text-[10px] font-bold uppercase mb-2">
+                            <span>Security Level</span>
+                            <span class="text-indigo-300">High</span>
+                        </div>
+                        <div class="w-full bg-indigo-900 rounded-full h-1.5">
+                            <div class="bg-indigo-400 h-1.5 rounded-full" style="width: 85%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-card p-8">
+                    <h4 class="text-[10px] font-black uppercase tracking-[2px] mb-4 text-slate-400">Merchant Tools</h4>
+                    <div class="space-y-3">
+                        <a href="#" class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-all group">
+                            <span class="text-xs font-bold text-slate-600 group-hover:text-indigo-600">Inventory Manager</span>
+                            <i class="bi bi-arrow-right text-slate-300"></i>
+                        </a>
+                        <a href="#" class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-all group">
+                            <span class="text-xs font-bold text-slate-600 group-hover:text-indigo-600">Sales Reports</span>
+                            <i class="bi bi-arrow-right text-slate-300"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
-</div>
+</main>
 {% endblock %}

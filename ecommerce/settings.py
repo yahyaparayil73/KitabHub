@@ -75,7 +75,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'common.context_processors.customer_name',
+                # 'common.context_processors.customer_name',
+                # 'customer.context_processors.cart_item_count',
             ],
         },
     },
@@ -88,16 +89,16 @@ WSGI_APPLICATION = 'ecommerce.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'ecommerce_crud',
-        'USER': 'postgres',
-        'PASSWORD': 'yahya123',
-        'HOST' : 'localhost',
-        'PORT' : '5432'
 
- 
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            # Increase timeout from 5s to 20s to handle concurrent requests
+            'timeout': 20, 
+        },
     }
+    
 }
 
 
@@ -197,4 +198,7 @@ LOGGING = {
     }
 
 }
+
+# This moves session storage to memory instead of the db.sqlite3 file
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
  

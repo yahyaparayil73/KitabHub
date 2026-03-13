@@ -2,8 +2,10 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import render,redirect
 from random import randint
-from .models import Customer, Seller
+from .models import Customer
+from .models import Seller
 from django.core.mail import send_mail
+from django.contrib import messages
 
 
 def admin_login(request):
@@ -11,49 +13,68 @@ def admin_login(request):
 
 
 def customer_login(request):
+    # Security: If already logged in, redirect to catalog
+    if 'customer' in request.session:
+        return redirect('customer:cust_view_prod')
 
-    msg = ''
-    if request.method == 'POST':
-        cemail = request.POST['email']
-        cpassword = request.POST['password']
-        try :
-            new_customer = Customer.objects.get(c_email = cemail,c_password = cpassword)
-            request.session['customer'] = new_customer.id
-            return redirect('customer:home')
-
-        except:
-            msg = 'Invalid credentials'
-    
-    return render(request, 'common/customer login.html',{'message':msg})
-
-
-def customer_signup(request):
-    msg = ''
-
-    if request.method == 'POST' :
-        cname = request.POST['customer_name']
-        cemail = request.POST['email']
-        cmobile = request.POST['mobile_number']
-        caddress = request.POST['address']
-        cgender = request.POST['gender']
-        cpassword = request.POST['password']
+    if request.method == "POST":
+        email = request.POST.get('email')
+        password = request.POST.get('password')
 
         try:
-            new_customer = Customer(
-                c_name = cname, 
-                c_email = cemail, 
-                c_mobile = cmobile,
-                c_address = caddress, 
-                c_gender = cgender,
-                c_password = cpassword
-                )
-            new_customer.save()
-            msg = 'Successfully Registered Customer'
-        except:
-            msg = 'Invalid Credentials'
+            # 1. Authenticate against the Customer model
+            customer = Customer.objects.get(c_email=email, c_password=password)
+            
+            # 2. Set Session (The Key for your @auth_customer decorator)
+            request.session['customer'] = customer.id
+            
+            # 3. Success Feedback
+            messages.success(request, f"Welcome back to the Archive, {customer.c_name}.")
+            
+            # 4. Redirect to Catalog
+            return redirect('customer:cust_view_prod')
 
+        except Customer.DoesNotExist:
+            # 5. Professional Error Message (Don't reveal if it was the email or password)
+            messages.error(request, "Invalid credentials. Access to the KitabHub archive denied.")
+            return redirect('common:customer_login')
 
-    return render(request, 'common/customer signup.html', {'message':msg})
+    return render(request, 'common/customerlogin.html')
+
+def customer_register(request):
+    if 'customer' in request.session:
+        return redirect('customer:cust_view_prod')
+
+    if request.method == "POST":
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+        password = request.POST.get('password')
+
+        # Check for existing account
+        if Customer.objects.filter(c_email=email).exists():
+            messages.error(request, "This email is already registered in the KitabHub archive.")
+            return redirect('common:customer_register')
+
+        try:
+            # Create the record
+            Customer.objects.create(
+                c_name=name,
+                c_email=email,
+                c_phone=phone,
+                c_password=password
+            )
+            print('success')
+            
+            # 1. Prepare the success message
+            messages.success(request, "Registration Successful! Your KitabHub account is now active. Please Log In.")
+            return redirect('common:customer_login')
+
+        except Exception as e:
+            messages.error(request, "An error occurred during archive initialization. Please try again.")
+            return redirect('common:customer_register')
+
+    return render(request, 'common/customer signup.html')
 
 
 def project_home(request):
@@ -61,64 +82,61 @@ def project_home(request):
 
 
 def seller_login(request):
-    msg = ''
 
-    if request.method == 'POST' :
+    if request.method == "POST":
+        email = request.POST.get('email')
+        password = request.POST.get('password')
 
-        susername = request.POST['username']
-        spassword = request.POST['password']
         try:
-            seller = Seller.objects.get(s_username=susername, s_password = spassword)
+            seller = Seller.objects.get(s_email=email, s_password=password)
+            
+            # Check if verified by admin
+            if not seller.is_verified:
+                messages.warning(request, "Your account is pending verification by the KitabHub team.")
+                return redirect('common:seller_login')
+
             request.session['seller'] = seller.id
+            messages.success(request, f"Welcome, {seller.s_store_name} Archive Portal.")
             return redirect('seller:seller_home')
-        except:
-            msg = 'Invalid Credentials'
-    return render(request, 'common/seller login.html',{'message':msg})
+
+        except Seller.DoesNotExist:
+            messages.error(request, "Invalid Seller credentials.")
+            return redirect('common:seller_login')
+
+    return render(request, 'common/seller login.html')
 
 
 def seller_signup(request):
-    msg = ''
-    if request.method == 'POST' :
-        sname = request.POST['seller_name']
-        smobile = request.POST['seller_mobile']
-        semail = request.POST['seller_email']
-        saddress = request.POST['seller_address']
-        sbankname = request.POST['seller_bank_name']
-        saccountnumb = request.POST['seller_account_number']
-        sbankbranch = request.POST['seller_bank_branch']
-        sifsccode = request.POST['seller_ifsc']
-        simage = request.FILES['seller_pic']
-        susername = randint(1000,9999)
-        spassword = 'sel-'+sname.lower()+str(susername)
+    if 'seller' in request.session:
+        return redirect('seller:seller_dashboard') # Assuming you have a seller app dashboard
 
-        seller = Seller(
-            s_name = sname,
-            s_mobile = smobile,
-            s_email = semail,
-            s_address = saddress,
-            s_bank_name = sbankname,
-            s_acc_number = saccountnumb,
-            s_bank_branch = sbankbranch,
-            s_ifsc_code = sifsccode,
-            s_image = simage,
-            s_username = susername,
-            s_password = spassword)
-        seller.save()
-        
-        msg = 'seller registered successfully'
+    if request.method == "POST":
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        store_name = request.POST.get('store_name')
+        phone = request.POST.get('phone')
+        password = request.POST.get('password')
 
-        subject = 'account name and password'
-        message = 'hai your username is '+str(susername)+'and your password is '+spassword
-        email_from = settings.EMAIL_HOST_USER
-        send_mail(
-            subject,
-            message,
-            email_from,
-            [semail],
-            fail_silently = False
-        )
-        
-    return render(request, 'common/seller signup.html',{'message':msg})
+        # Check if seller already exists
+        if Seller.objects.filter(s_email=email).exists():
+            messages.error(request, "This email is already registered as a Seller.")
+            return redirect('common:seller_signup')
+
+        try:
+            Seller.objects.create(
+                s_name=name,
+                s_email=email,
+                s_store_name=store_name,
+                s_phone=phone,
+                s_password=password
+            )
+            messages.success(request, "Seller Registration Successful! Please wait for Admin verification.")
+            return redirect('common:seller_login')
+        except Exception as e:
+            messages.error(request, "Error during registration. Please check your details.")
+            return redirect('common:seller_signup')
+
+    return render(request, 'common/seller signup.html')
 
 def master_common(request):
     return render(request, 'common/master_common.html')         
@@ -127,8 +145,14 @@ def test(request):
     return render(request, 'common/test.html')
 
 def email_exist(request):
-    email = request.POST['email_data']
+    email = request.POST.get('email_data', '')
     email_exists = Customer.objects.filter(c_email = email).exists()
     return JsonResponse({'email_exists':email_exists})
+
+def salary_generator(request):
+    return render(request, 'common/salary_generator.html')
+
+def to_do_list(request):
+    return render(request, 'common/to_do_list.html')
 
      

@@ -41,16 +41,6 @@ form div input {
 
 }
 
-#form_id {
-
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    width: 450px;
-    margin-left: 330px;
-   
-}
-
 #form_id span {
 
     color: red;

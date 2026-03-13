@@ -1,187 +1,110 @@
 {% extends 'customer/master_customer.html' %}
 {% load static %}
 
-{% block title %}
-<title>Your Cart</title>
-<link rel="stylesheet" href="{% static 'style/cart_style.css' %}">
-
-{% endblock %}
+{% block title %}The Archive Cart | KitabHub{% endblock %}
 
 {% block content %}
-<div class="cart_heading_div">
-
-    <h2>Cart</h2>
-    <p>
-
-        <a href="{% url 'customer:home' %}">Home</a> |
-        <a href="#">Cart</a>
-
-    </p>
-
-</div>
-
-<div class="container">
-    <div class="table_div">
-        <table class="table">
-            <thead>
-                <th>
-                    Product Image
-                </th>
-                <th>
-                    Product Name
-                </th>
-                <th>
-                    Product Category
-                </th>
-                <th>
-                    Product Price
-                </th>
-                <th>
-                    Quantity
-                </th>
-                <th>
-                    Total Price
-                </th>
-            </thead>
-            <!-- {{cart_items}} -->
-            {% for item in cart_items %}
-            <tr data-item-id="{{ item.product.id }}">
-                <td>
-                    <img src="{{ item.product.p_image.url }}" width="65px">
-                </td>
-                <td class="Product_name">
-                    {{ item.product.p_name |title}}
-                </td>
-                <td>
-                    {{ item.product.p_category }}
-                </td>
-                <td>
-                    ₹ {{ item.product.p_price }}
-                </td>
-                <td class="quantity">
-                    {% csrf_token %}
-                    <input type="number" class="qty-input" min="1" data-item="{{ item.product.id }}"
-                        style="width: 50px;"><br>
-                    <span id="stock_error"></span>
-                    <span id="stock_success"></span>
-                </td>
-                <td class="total_amount">
-                </td>
-                <td class="cart_delete">
-                    <a href="#" class="delete-link">
-                        <p>Delete</p>
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
-    </div>
-
-    <div class="amount_div">
-
-        <table class="amount_table">
-            <tr>
-                <td>Grandtotal</td>
-                <td class="grand_total">
-                </td>
-            </tr>
-        </table>
-        <div>
-            <button class="btn btn-success">Place Order</button>
+<div class="min-h-screen py-16 px-6">
+    <div class="max-w-6xl mx-auto">
+        
+        <div class="mb-12">
+            <h1 class="serif-title text-4xl text-[#064e3b]">Your Selections</h1>
+            <p class="text-[10px] font-bold uppercase tracking-[4px] text-emerald-600 mt-2">Inventory of your curated archive</p>
         </div>
 
+        <div class="flex flex-col lg:flex-row gap-12">
+            
+            <div class="flex-grow space-y-6">
+                
+                <div class="cart-card bg-white p-6 rounded-[2.5rem] shadow-sm border border-emerald-50 flex items-center gap-6 transition-all hover:shadow-xl hover:border-emerald-100" data-product-id="101">
+                    <button class="btn-remove w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all border-none outline-none">
+                        <i class="bi bi-x-lg text-xs"></i>
+                    </button>
+                    <div class="w-24 h-32 bg-[#e8f5e9] rounded-2xl overflow-hidden shadow-md shrink-0 flex items-center justify-center">
+                         <i class="bi bi-book text-[#064e3b] text-3xl"></i> </div>
+                    <div class="flex-grow">
+                        <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Eco-Edition</p>
+                        <h3 class="text-lg font-bold text-slate-800 leading-tight mb-2">The Emerald Forest: A History</h3>
+                        <p class="text-slate-400 text-xs font-semibold">Unit: ₹ <span class="unit-price">1,250</span></p>
+                    </div>
+                    <div class="text-right flex flex-col items-end gap-3">
+                        <input type="number" value="1" min="1" class="quantity-input w-16 bg-slate-50 text-center border border-slate-100 rounded-xl py-2 font-bold text-sm text-[#064e3b]" data-price="1250">
+                        <p class="price serif-title text-xl text-[#064e3b] font-bold">₹ 1,250</p>
+                    </div>
+                </div>
 
+                <div class="cart-card bg-white p-6 rounded-[2.5rem] shadow-sm border border-emerald-50 flex items-center gap-6 transition-all hover:shadow-xl hover:border-emerald-100" data-product-id="102">
+                    <button class="btn-remove w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all border-none outline-none">
+                        <i class="bi bi-x-lg text-xs"></i>
+                    </button>
+                    <div class="w-24 h-32 bg-[#f1f5f9] rounded-2xl overflow-hidden shadow-md shrink-0 flex items-center justify-center">
+                         <i class="bi bi-journal-richtext text-[#064e3b] text-3xl"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Modern Archive</p>
+                        <h3 class="text-lg font-bold text-slate-800 leading-tight mb-2">Minimalist Living: Modern Age</h3>
+                        <p class="text-slate-400 text-xs font-semibold">Unit: ₹ <span class="unit-price">899</span></p>
+                    </div>
+                    <div class="text-right flex flex-col items-end gap-3">
+                        <input type="number" value="2" min="1" class="quantity-input w-16 bg-slate-50 text-center border border-slate-100 rounded-xl py-2 font-bold text-sm text-[#064e3b]" data-price="899">
+                        <p class="price serif-title text-xl text-[#064e3b] font-bold">₹ 1,798</p>
+                    </div>
+                </div>
 
+                <div class="cart-card bg-white p-6 rounded-[2.5rem] shadow-sm border border-emerald-50 flex items-center gap-6 transition-all hover:shadow-xl hover:border-emerald-100" data-product-id="103">
+                    <button class="btn-remove w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all border-none outline-none">
+                        <i class="bi bi-x-lg text-xs"></i>
+                    </button>
+                    <div class="w-24 h-32 bg-[#fdf2f8] rounded-2xl overflow-hidden shadow-md shrink-0 flex items-center justify-center">
+                         <i class="bi bi-pencil-square text-[#064e3b] text-3xl"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Limited Edition</p>
+                        <h3 class="text-lg font-bold text-slate-800 leading-tight mb-2">The Sustainable Architect</h3>
+                        <p class="text-slate-400 text-xs font-semibold">Unit: ₹ <span class="unit-price">2,400</span></p>
+                    </div>
+                    <div class="text-right flex flex-col items-end gap-3">
+                        <input type="number" value="1" min="1" class="quantity-input w-16 bg-slate-50 text-center border border-slate-100 rounded-xl py-2 font-bold text-sm text-[#064e3b]" data-price="2400">
+                        <p class="price serif-title text-xl text-[#064e3b] font-bold">₹ 2,400</p>
+                    </div>
+                </div>
 
+            </div>
+
+            <div class="lg:w-96">
+                <div class="sticky top-32 bg-white p-10 rounded-[3rem] shadow-2xl border border-emerald-50">
+                    <h2 class="serif-title text-2xl text-slate-800 mb-8">Summary</h2>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-widest">
+                            <span>Subtotal</span>
+                            <span id="cart-subtotal" class="text-slate-800">₹ 5,448</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] font-bold text-emerald-600 uppercase tracking-widest">
+                            <span>Shipping</span>
+                            <span>Calculated at checkout</span>
+                        </div>
+                        <div class="h-[1px] bg-slate-100 w-full my-4"></div>
+                        <div class="flex justify-between items-baseline">
+                            <span class="serif-title text-xl text-slate-800">Total</span>
+                            <span id="cart-total" class="serif-title text-3xl text-[#064e3b]">₹ 5,448</span>
+                        </div>
+                    </div>
+
+                    <button class="w-full bg-[#064e3b] text-white py-6 rounded-2xl font-bold text-[10px] uppercase tracking-[4px] shadow-xl hover:bg-black transition-all group">
+                        Proceed to Checkout <i class="bi bi-arrow-right ms-2 group-hover:translate-x-2 transition-transform"></i>
+                    </button>
+
+                    <div class="mt-8 flex items-center gap-3 p-4 bg-emerald-50 rounded-2xl">
+                        <i class="bi bi-tree-fill text-emerald-500"></i>
+                        <p class="text-[9px] font-black text-emerald-800 uppercase tracking-widest leading-tight">
+                            Your order plants 1 tree in our archive forest.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 </div>
-
-<script>
-
-    $(document).ready(function () {
-        $.ajaxSetup({
-            headers: {
-                "X-CSRFToken": $('[name=csrfmiddlewaretoken]').val()
-            }
-        })
-
-        $('.qty-input').change(function () {
-
-            $.ajax({
-
-                type: 'POST',
-                url: "{% url 'customer:change_quantity' %}",
-                data: {
-                    'product_id': $(this).attr('data-item'),
-                    'quantity': $(this).val()
-                },
-
-
-                success: function (response) {
-                    let error = response.error_msg
-                    if (error == "In stock") {
-                        $('#stock_error').html(error)
-                        $('#stock_error').css('color', 'green')
-
-                    } else {
-                        $('#stock_error').html(error)
-                        $('#stock_error').css('color', 'red')
-                    }
-                    $('#stock_error').html(error)
-
-
-                }
-            })
-        })
-        displayTotalAmount()
-        $.ajaxSetup({
-            headers: {
-                "X-CSRFToken": '{{ csrf_token }}'
-            }
-        })
-
-        $('.quantity input').on('change', function () {
-            let qty = $(this).val()
-            let pid = $(this).attr('data-item')
-
-            $.ajax({
-                url: "{% url 'customer:total_price' %}",
-                method: 'POST',
-                data: {
-                    'pid': pid,
-                    'qty': qty
-                },
-                success: function (response) {
-                    $(this).closest('tr').find('.total_amount').html('₹' + response.amount);
-                    displayTotalAmount()
-                }.bind(this)
-            });
-        });
-    })
-
-    function displayTotalAmount() {
-        let amount_cells = document.getElementsByClassName('total_amount');
-        let total = 0;
-
-        for (let i = 0; i < amount_cells.length; i++) {
-            let amount = parseFloat(amount_cells[i].textContent.replace('₹', '')); // Remove the ₹ symbol
-            total += amount;
-        }
-
-        $('.grand_total').html('₹' + total);
-    }
-
-
-    // $.ajaxSetup({
-    //     headers: {
-    //         "X-CSRFToken": '{{ csrf_token }}'
-    //     }
-    // })
-
-    // $('.delete-link').on('click', function () {
-
-
-    // })
-
-</script>
 {% endblock %}

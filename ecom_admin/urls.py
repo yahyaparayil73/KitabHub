@@ -6,17 +6,14 @@ app_name='ecom_admin'
 urlpatterns = [
     path('approve sellers',views.approve_sellers,name='approve sellers'),
     path('ecom_home',views.ecom_home,name='ecom_home'),
-    path('view customers',views.view_customers,name='view customers'),
-    path('view sellers',views.view_sellers,name='view sellers'),
-    path('view orders',views.view_orders,name='view orders'),
-    path('recent updates',views.recent_updates,name='recent updates'),
-    path('view products',views.view_products,name='view products'),
-    path('remove customer',views.remove_customer,name='remove customer'),
-    path('remove seller',views.remove_seller,name='remove seller'),
-    path('remove product',views.remove_product,name='remove product'),
+    path('view_order',views.view_order,name='view_order'),
+    path('view_product',views.view_product,name='view_product'),
+    path('view_seller', views.view_seller, name='view_seller'),
+    path('sellers/remove/<int:seller_id>/', views.remove_seller, name='remove_seller'),
+    path('view_customer', views.view_customer, name='view_customer'),
+    path('customers/remove/<int:customer_id>/', views.remove_customer, name='remove_customer'),
+    # path('remove_product',views.remove_product,name='remove_product'),
     path('admin_master',views.admin_master,name='admin_master'),
-    path('admin_login',views.admin_login,name='admin_login'),
-
 
     
 

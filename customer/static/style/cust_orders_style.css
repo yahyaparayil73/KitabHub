@@ -1,45 +1,59 @@
-.main_div {
-
-    font-family: 'Jost', sans-serif;
-    margin-top: 20px;
-
-
-}
-
-.container {
-
-    border: solid 0.25px rgb(67, 66, 66, 0.5);
-
-}
-
-.main_row {
-
-    padding: 10px;
-
-}
-
-.main_row p {
-
-    line-height: 0px;
-
-}
-
-.ptags_div {
-
-    margin-top: 15px;
-
-}
-
-.order_heading {
-
-    padding-left: 80px;
-    color: rgb(107, 110, 110);
-
-
-}
-
-.orders_heading_div {
-
-    display: flex;
-    padding-top: 25px;
-}
+body {
+      background: #f5f6f8;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .order-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: 0.2s;
+    }
+    .order-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    }
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .order-id {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    .order-date {
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+    .status-badge {
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .status-completed {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status-cancelled {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .btn-orange {
+      background: linear-gradient(45deg, #ffb84d, #ff9933);
+      border: none;
+      color: #fff;
+      font-weight: 600;
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 0.9rem;
+    }
+    .btn-orange:hover {
+      background: linear-gradient(45deg, #ff9933, #ff751a);
+    }

@@ -1,55 +1,44 @@
-from django.shortcuts import render
-
 from common.models import Customer, Seller
 from seller.models import Product
+from django.shortcuts import render, redirect, get_object_or_404
 
 
 def approve_sellers(request):
     return render(request, 'ecom_admin/approve sellers.html')
 
-def admin_login(request):
-    return render(request, 'ecom_admin/admin_login.html')
-
 
 def ecom_home(request):
-    customer_count = Customer.objects.count()
-    seller_count = Seller.objects.count()
-    product_count = Product.objects.count()
-    return render(request, 'ecom_admin/home.html', {'c_count': customer_count,'s_count': seller_count,'p_count':product_count})
+    return render(request, 'ecom_admin/home.html')
+
+# 2. Seller Logic
+def view_seller(request):
+    sellers = Seller.objects.all().order_by('-id')
+    return render(request, 'ecom_admin/view_seller.html', {'sellers': sellers})
+
+def remove_seller(request, seller_id):
+    get_object_or_404(Seller, id=seller_id).delete()
+    return redirect('ecom_admin:remove_customer')
+
+# 3. Customer Logic
+def view_customer(request):
+    customers = Customer.objects.all().order_by('-id')
+    return render(request, 'ecom_admin/view_customer.html', {'customers': customers})
+
+def remove_customer(request, customer_id):
+    get_object_or_404(Customer, id=customer_id).delete()
+    return redirect('ecom_admin:remove_customer')
 
 
-def view_customers(request):
-    customers = Customer.objects.all()
-    return render(request, 'ecom_admin/view customers.html',{'customers':customers})
+def view_order(request):
+    # Fetching all orders, latest first
+    orders = Order.objects.all().order_by('-id')
+    return render(request, 'ecom_admin/view_order.html', {'orders': orders})
 
 
-def view_sellers(request):
-    sellers = Seller.objects.all()
-    return render(request, 'ecom_admin/view sellers.html',{'sellers':sellers})
-
-
-def view_orders(request):
-    return render(request, 'ecom_admin/view orders.html')
-
-
-def recent_updates(request):
-    return render(request, 'ecom_admin/recent updates.html')
-
-
-def view_products(request):
-    return render(request, 'ecom_admin/view products.html')
-
-
-def remove_customer(request):
-    return render(request, 'ecom_admin/remove customer.html')
-
-
-def remove_seller(request):
-    return render(request, 'ecom_admin/remove seller.html')
-
-
-def remove_product(request):
-    return render(request, 'ecom_admin/remove product.html')
+def view_product(request):
+    # Fetching products with seller info (using select_related to optimize database hits)
+    products = Product.objects.all()    
+    return render(request, 'ecom_admin/view_product.html', {'products': products})
 
 
 def admin_master(request):

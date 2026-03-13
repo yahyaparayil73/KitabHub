@@ -1,48 +1,126 @@
 {% extends 'seller/master_seller.html' %}
 {% load static %}
 
-{% block title %}
-<title>Add Product</title>
-<link rel="stylesheet" href="{% static 'style/add_product_style.css' %}">
-{% endblock %}
+{% block title %}Archive New Volume | ShopeHub Merchant{% endblock %}
 
 {% block content %}
-<h1>ADD PRODUCT</h1><br>
-<div class="container">
-    <form method="POST" enctype="multipart/form-data" id="form_id">
-        {% csrf_token %}
-        {{success_message}}
-        <div class="mb-3">
-            <label for="exampleFormControlInput1" class="form-label">Product Name</label>
-            <input type="text" class="form-control" id="nameField" name="p_name">
+<div class="max-w-5xl mx-auto py-10 px-4">
+    
+    <div class="mb-10 flex flex-col md:flex-row justify-between items-end gap-4">
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Archive New Volume</h1>
+            <p class="text-slate-400 text-sm mt-1 uppercase tracking-[3px] font-bold text-[10px]">Cataloging Secure Entry #{{ request.session.seller }}</p>
         </div>
-        <div class="mb-3">
-            <label for="exampleFormControlTextarea1" class="form-label">Product Description</label>
-            <textarea class="form-control" id="descriptionField" rows="1" name="p_description"></textarea>
+        <div class="bg-purple-600 text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-purple-200">
+            Internal Marketing v2
         </div>
-        <div class="mb-3">
-            <label for="exampleFormControlInput1" class="form-label">Product Category</label>
-            <input type="text" class="form-control" id="categoryField" name="p_category">
-        </div>
-        <div class="mb-3">
-            <label for="exampleFormControlInput1" class="form-label">Product Number</label>
-            <input type="text" class="form-control" id="numberField" name="p_number">
-        </div>
-        <div class="mb-3">
-            <label for="exampleFormControlInput1" class="form-label">Current Stock</label>
-            <input type="text" class="form-control" id="stockField" name="p_current_stock">
-        </div>
-        <div class="mb-3">
-            <label for="exampleFormControlInput1" class="form-label">Price</label>
-            <input type="text" class="form-control" id="priceField" name="p_price">
-        </div>
-        <label for="exampleFormControlInput1" class="form-label">Product Image</label>
-        <div class="input-group mb-3">
-            <input type="FILE" class="form-control" id="inputGroupFile02" name="p_image">
-            <label class="input-group-text" for="inputGroupFile02">Upload</label>
-        </div>
-        <button type="submit" class="btn btn-success">Submit Product</button>
-    </form>
+    </div>
+
+    <div class="bg-white rounded-[3rem] shadow-2xl shadow-purple-900/5 border border-purple-50 overflow-hidden">
+        <div class="h-2 bg-gradient-to-r from-purple-600 via-violet-400 to-purple-800"></div>
+
+        <form method="POST" enctype="multipart/form-data" class="p-8 lg:p-14 space-y-12">
+            {% csrf_token %}
+            
+            {% if success_message %}
+            <div class="p-5 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-4 animate-bounce">
+                <i class="bi bi-shield-check text-emerald-600 text-xl"></i>
+                <p class="text-emerald-900 text-[11px] font-black uppercase tracking-widest">{{ success_message }}</p>
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <div class="md:col-span-2 group space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 group-focus-within:text-purple-600 transition-colors">Book Title</label>
+                    <input type="text" name="p_name" required placeholder="The Great Archive" 
+                        class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-600 transition-all text-sm font-semibold">
+                </div>
+
+                <div class="group space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 group-focus-within:text-purple-600 transition-colors">ISBN / Ref Number</label>
+                    <input type="number" name="p_number" required placeholder="9780123..." 
+                        class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-600 transition-all text-sm font-semibold">
+                </div>
+
+                <div class="group space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 group-focus-within:text-purple-600 transition-colors">Lead Author</label>
+                    <input type="text" name="p_author" required placeholder="E.M. Green" 
+                        class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-600 transition-all text-sm font-semibold">
+                </div>
+
+                <div class="group space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 group-focus-within:text-purple-600 transition-colors">Genre Category</label>
+                    <input type="text" name="p_genre" required placeholder="Fiction / Non-Fiction" 
+                        class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-600 transition-all text-sm font-semibold">
+                </div>
+
+                <div class="group space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 group-focus-within:text-purple-600 transition-colors">Release Year</label>
+                    <input type="text" name="p_year" required placeholder="2026" 
+                        class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-600 transition-all text-sm font-semibold">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-slate-50">
+                <div class="group space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 group-focus-within:text-purple-600 transition-colors">Inventory Units</label>
+                    <input type="number" name="p_stock" required placeholder="0" 
+                        class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-600 transition-all text-sm font-semibold">
+                </div>
+
+                <div class="group space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 group-focus-within:text-purple-600 transition-colors">Valuation (INR)</label>
+                    <div class="relative">
+                        <span class="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold">₹</span>
+                        <input type="number" step="0.01" name="p_price" required placeholder="0.00" 
+                            class="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-600 transition-all text-sm font-black text-purple-700">
+                    </div>
+                </div>
+
+                <div class="group space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 group-focus-within:text-purple-600 transition-colors">Best Seller Status</label>
+                    <select name="best_seller" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-600 transition-all text-sm font-semibold appearance-none cursor-pointer">
+                        <option value="No">No (Standard)</option>
+                        <option value="Yes">Yes (Featured)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="group space-y-2">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 group-focus-within:text-purple-600 transition-colors">Manuscript Synopsis</label>
+                <textarea name="p_description" rows="4" required placeholder="Describe the volume's essence..." 
+                    class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-[2rem] outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-600 transition-all text-sm font-semibold resize-none"></textarea>
+            </div>
+
+            <div class="space-y-4">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Cover Art Impression</label>
+                <div class="relative group">
+                    <input type="file" name="p_image" id="file_upload" class="hidden" required>
+                    <label for="file_upload" class="w-full flex items-center gap-8 border-2 border-dashed border-slate-100 rounded-[2.5rem] p-8 hover:border-purple-300 hover:bg-purple-50/30 transition-all cursor-pointer group">
+                        <div class="w-20 h-20 bg-purple-100 rounded-3xl flex items-center justify-center text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-all shadow-lg shadow-purple-100">
+                            <i class="bi bi-cloud-arrow-up text-3xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-black uppercase tracking-widest text-slate-800" id="file_name_display">Upload Reference Cover</span>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase mt-1">High-Resolution PNG or JPG Recommended</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full py-7 bg-black text-white rounded-[2rem] font-black text-xs uppercase tracking-[5px] shadow-2xl hover:bg-purple-600 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-4">
+                Authorize & List to Global Catalog
+            </button>
+        </form>
+    </div>
 </div>
-<br>
+
+<script>
+    document.getElementById('file_upload').onchange = function () {
+        const fileName = this.files[0].name;
+        document.getElementById('file_name_display').innerText = `SELECTED: ${fileName}`;
+        document.getElementById('file_name_display').classList.add('text-purple-600');
+    };
+</script>
 {% endblock %}

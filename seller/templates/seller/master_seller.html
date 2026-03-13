@@ -1,134 +1,195 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{% static 'style/master_seller_style.css' %}">
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
-        integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"
-        integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD"
-        crossorigin="anonymous"></script>
-    <script src=" https://code.jquery.com/jquery-3.6.4.js"
-        integrity="sha256-a9jBBRygX1Bh5lt8GZjXDzyOB+bWve9EiO7tROUtj/E=" crossorigin="anonymous">
-        </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Clicker+Script&family=Jost:wght@100;400;500;600&family=Poppins&display=swap"
-        rel="stylesheet">
-    <script src="https://kit.fontawesome.com/9edefc9b63.js" crossorigin="anonymous"></script>
-    {% block title %}
-    <title>Master seller</title>
-    {% endblock %}
+    <title>{% block title %}ShopeHub Merchant{% endblock %}</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800&family=Fraunces:ital,opsz,wght@0,9..144,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+    <script src="https://code.jquery.com/jquery-3.6.4.js"></script>
+
+    <style>
+        :root {
+            --merchant-purple: #7c3aed;
+            --merchant-dark: #0f172a;
+        }
+
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background: #f8fafc; 
+            color: #1e293b; 
+            margin: 0;
+            overflow: hidden; /* Prevent double scrollbars */
+        }
+        
+        .serif-title { font-family: 'Fraunces', serif; }
+        
+        /* Sidebar Link Styling */
+        .sidebar-link {
+            transition: all 0.2s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.875rem 1rem;
+            border-radius: 1rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        
+        .sidebar-link:hover {
+            background: #f5f3ff;
+            color: var(--merchant-purple);
+        }
+
+        .sidebar-link.active {
+            background: #f5f3ff;
+            color: var(--merchant-purple);
+            box-shadow: 0 4px 12px -2px rgba(124, 58, 237, 0.08);
+        }
+
+        .sidebar-link.active::after {
+            content: '';
+            position: absolute;
+            right: 12px;
+            width: 6px;
+            height: 6px;
+            background: var(--merchant-purple);
+            border-radius: 50%;
+        }
+
+        /* Custom Scrollbar for Main Content */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    </style>
 </head>
+<body class="flex h-screen overflow-hidden">
 
-<body>
-    <div>
-        <!-- -------------------------start of first heading------------------------------------ -->
-        <div class="first_heading_div">
-            <ul class="heading_ul">
-                <li>
-                    <a href="#">About</a>
-                </li>
-                <li>
-                    <a href="#">
-                        Privacy
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        FAQ
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        Careers
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        Track your Order
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        My Wishlist
-                    </a>
-                </li>
-                <div class="ul_inside_div">
-                    <a href="#"><i class="fa-brands fa-facebook"></i></a>
-                    <a href="#"><i class="fa-brands fa-twitter"></i></a>
-                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#"><i class="fa-brands fa-whatsapp"></i></a>
-                    <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+    <aside class="hidden lg:flex w-80 bg-white border-r border-slate-100 flex-col h-screen shrink-0">
+        <div class="p-8">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-purple-200">
+                    <i class="bi bi-layers-half text-xl"></i>
                 </div>
-
-            </ul>
-
-        </div>
-        <!-- -------------------------end of first heading------------------------------------ -->
-
-        <nav class="navbar navbar-expand-lg bg-success">
-            <div class="container-fluid">
-                <a class="navbar-brand text-light" href="#"><b>SHOP</b>EHUB</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 text-light">
-                        <li class="nav-item">
-                            <a class="nav-link" aria-current="page" href="{% url 'seller:seller_home' %}">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'seller:add_product' %}">Add Product</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'seller:update_stock' %}">Update
-                                Stock</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'seller:seller_profile' %}">Profile</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'seller:view_product' %}">View Products</a>
-                        </li>
-                    </ul>
-
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 text-light" style="padding-left: 40px;">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'seller:changepassword' %}">Change
-                                Password</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'seller:seller_logout' %}">Logout</a>
-                        </li>
-                    </ul>
+                <div>
+                    <span class="serif-title text-xl font-bold tracking-tight text-slate-900 block">ShopeHub</span>
+                    <span class="text-[9px] font-black text-slate-300 uppercase tracking-[2px]">Merchant Console</span>
                 </div>
             </div>
+        </div>
+
+        <nav class="flex-1 px-6 space-y-1 overflow-y-auto no-scrollbar">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[3px] mt-4 mb-3 ml-3">Analytics & Base</p>
+            
+            <a href="{% url 'seller:seller_home' %}" class="sidebar-link active">
+                <i class="bi bi-grid-1x2"></i> Command Center
+            </a>
+
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[3px] mt-8 mb-3 ml-3">Inventory Mgmt</p>
+            
+            <a href="{% url 'seller:view_product' %}" class="sidebar-link">
+                <i class="bi bi-safe2"></i> Inventory Vault
+            </a>
+            
+            <a href="{% url 'seller:add_product' %}" class="sidebar-link">
+                <i class="bi bi-plus-circle"></i> Archive New Volume
+            </a>
+
+            <a href="{% url 'seller:stock_update' %}" class="sidebar-link">
+                <i class="bi bi-arrow-repeat"></i> Ledger Sync (Stock)
+            </a>
+
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[3px] mt-8 mb-3 ml-3">Sales & Fulfillment</p>
+
+            <a href="{% url 'seller:view_orders' %}" class="sidebar-link">
+                <i class="bi bi-cart-check"></i> Incoming Orders
+                <span class="ml-auto bg-purple-100 text-purple-600 text-[10px] px-2 py-0.5 rounded-md">12</span>
+            </a>
+
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[3px] mt-8 mb-3 ml-3">Personal Workspace</p>
+
+            <a href="{% url 'seller:seller_profile' %}" class="sidebar-link">
+                <i class="bi bi-person-badge"></i> Merchant Profile
+            </a>
+
+            <a href="{% url 'seller:logout' %}" class="sidebar-link text-slate-400 hover:text-red-500 hover:bg-red-50">
+                <i class="bi bi-power"></i> Secure Logout
+            </a>
         </nav>
 
-         <!-- -------------------------start of second heading------------------------------------ -->
-
-         <div class="main_heading_div">
-
-            <h6>Sale Up To 50% Biggest Discounts. Hurry! Limited Period Registration  <u><a href="#">Shop Now</a></u>
-
-            </h6>
-
+        <div class="p-6 border-t border-slate-50">
+            <div class="bg-slate-900 rounded-2xl p-4 relative overflow-hidden group cursor-default">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full -mr-12 -mt-12 blur-2xl"></div>
+                <div class="flex items-center gap-3 relative z-10">
+                    <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white text-xs font-black">
+                        {{ seller_profile_data.s_name|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-white truncate w-32 uppercase tracking-widest">{{ seller_profile_data.s_name }}</p>
+                        <p class="text-[9px] text-purple-400 font-bold uppercase mt-0.5">System Sync: OK</p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <!-- -------------------------end of second heading------------------------------------ -->
-        {% block content %}
+    </aside>
 
-        {% endblock %}
-    </div>
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-4 py-3 flex justify-around items-center z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.06)]">
+        <a href="{% url 'seller:seller_home' %}" class="p-3 text-purple-600"><i class="bi bi-grid-1x2 text-xl"></i></a>
+        <a href="{% url 'seller:view_product' %}" class="p-3 text-slate-400"><i class="bi bi-safe2 text-xl"></i></a>
+        <a href="{% url 'seller:add_product' %}" class="w-14 h-14 bg-purple-600 rounded-2xl flex items-center justify-center text-white -mt-12 shadow-xl shadow-purple-200 border-[6px] border-white active:scale-95 transition-all">
+            <i class="bi bi-plus-lg text-xl"></i>
+        </a>
+        <a href="{% url 'seller:view_orders' %}" class="p-3 text-slate-400"><i class="bi bi-cart-check text-xl"></i></a>
+        <a href="{% url 'seller:seller_profile' %}" class="p-3 text-slate-400"><i class="bi bi-person-badge text-xl"></i></a>
+    </nav>
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <header class="h-20 shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-50 flex items-center justify-between px-6 lg:px-12 sticky top-0 z-40">
+            <div class="lg:hidden flex items-center gap-3">
+                <div class="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center text-white">
+                    <i class="bi bi-layers-half text-sm"></i>
+                </div>
+                <span class="serif-title text-lg font-bold">ShopeHub</span>
+            </div>
+            
+            <div class="hidden lg:block">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-[4px]">Verified Merchant Protocol v2.6</span>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="hidden sm:flex flex-col text-right mr-2">
+                    <span class="text-xs font-black text-slate-800 tracking-tight">Active Session</span>
+                    <span class="text-[9px] font-bold text-emerald-500 uppercase">Secure Connection</span>
+                </div>
+                <button class="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center hover:text-purple-600 transition-colors">
+                    <i class="bi bi-bell-fill text-sm"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto custom-scroll p-6 lg:p-12 pb-32 lg:pb-12">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentPath = window.location.pathname;
+            const links = document.querySelectorAll('.sidebar-link');
+            
+            links.forEach(link => {
+                if(link.getAttribute('href') === currentPath) {
+                    links.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+
 </body>
-
 </html>

@@ -1,0 +1,103 @@
+{% extends 'ecom_admin/admin_master.html' %}
+{% load static %}
+
+{% block title %}
+<title>Global Catalog | Root Terminal</title>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    
+    <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-6">
+        <div>
+            <h1 class="serif-title text-4xl text-slate-900 tracking-tight">Global Catalog</h1>
+            <p class="text-slate-400 text-[10px] font-black uppercase tracking-[4px] mt-2">Inventory Oversight & Content Moderation</p>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <div class="bg-white px-5 py-2.5 rounded-xl border border-slate-100 shadow-sm">
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Active SKUs</p>
+                <p class="text-sm font-black text-slate-900">{{ products.count }} Units</p>
+            </div>
+            <button class="bg-black text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-200">
+                Bulk Audit
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/50 border-b border-slate-100">
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Asset</th>
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Metadata</th>
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Ownership</th>
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Valuation</th>
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Stock Level</th>
+                        <th class="px-8 py-6 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    {% for product in products %}
+                    <tr class="hover:bg-slate-50/30 transition-all group">
+                        <td class="px-8 py-6">
+                            <div class="flex items-center gap-4">
+                                <div class="w-14 h-20 bg-slate-100 rounded-lg overflow-hidden border border-slate-100 shrink-0">
+                                    <img src="{{ product.p_image.url }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                </div>
+                                <div class="max-w-[180px]">
+                                    <p class="text-sm font-black text-slate-900 leading-tight">{{ product.p_name|title }}</p>
+                                    <p class="text-[9px] font-bold text-slate-400 uppercase mt-1">Ref: #PROD-{{ product.id }}</p>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="px-8 py-6">
+                            <span class="px-3 py-1 bg-slate-100 text-slate-600 text-[9px] font-black uppercase tracking-widest rounded-md border border-slate-200">
+                                {{ product.p_category|default:"General" }}
+                            </span>
+                        </td>
+
+                        <td class="px-8 py-6">
+                            <p class="text-xs font-bold text-slate-700 underline underline-offset-4 decoration-slate-200 cursor-pointer hover:text-black">
+                                {{ product.seller.s_name|default:"Platform Direct" }}
+                            </p>
+                        </td>
+
+                        <td class="px-8 py-6">
+                            <p class="text-sm font-black text-slate-900">₹ {{ product.p_price }}</p>
+                            <p class="text-[9px] font-bold text-emerald-500 uppercase">MRP Verified</p>
+                        </td>
+
+                        <td class="px-8 py-6">
+                            {% if product.p_stock > 10 %}
+                                <div class="flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                                    <span class="text-xs font-bold text-slate-600">{{ product.p_stock }} In Units</span>
+                                </div>
+                            {% elif product.p_stock > 0 %}
+                                <div class="flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></span>
+                                    <span class="text-xs font-bold text-amber-600">Low: {{ product.p_stock }}</span>
+                                </div>
+                            {% else %}
+                                <span class="px-2 py-0.5 bg-red-50 text-red-600 text-[9px] font-black uppercase rounded">Depleted</span>
+                            {% endif %}
+                        </td>
+
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-8 py-32 text-center">
+                            <i class="bi bi-box-seam text-4xl text-slate-200 mb-4 block"></i>
+                            <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Catalog is Currently Vacant</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,10 +1,14 @@
-span {
+#msg_id {
 
     color: red;
 
 }
+#carsl_class{
 
-.card {
+    margin:0px;
+}
+
+.card_body {
 
     height: 400px;
     border: 0;
@@ -64,12 +68,6 @@ div {
 .card-body h5 {
 
     font-size: x-large;
-
-}
-
-.card-body h4 strike {
-
-    color: rgb(181, 62, 62);
 
 }
 

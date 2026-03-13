@@ -28,6 +28,10 @@
     padding-left: 400px;
 
 }
+button{
+
+    border-radius: 0%;
+}
 
 .ul_inside_div a {
 
@@ -74,4 +78,10 @@
 .main_heading_div a{
 
 color: bisque;
+}
+
+#passwordMessage{
+
+    color:green;
+
 }

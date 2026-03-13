@@ -1,4 +1,4 @@
-div {
+/* div {
 
     font-family: 'Jost', sans-serif;
 
@@ -57,6 +57,12 @@ div {
 
 }
 
+.error_asdmsg{
+
+    color:red;
+
+}
+
 .Product_name {
 
     width: 40px;
@@ -68,4 +74,92 @@ div {
     text-decoration: none;
     color: rgb(135, 131, 131);
 
+} */
+/* .cart-table img {
+    width: 70px;
+    height: auto;
 }
+.coupon-section {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+.checkout-box {
+    background: #f8f9fa;
+    padding: 20px;
+    border: 1px solid #ddd;
+}
+.btn-orange {
+    background-color: #ffb84d;
+    border: none;
+    color: black;
+    font-weight: 600;
+}
+.btn-orange:hover {
+    background-color: #ffa31a;
+} */
+
+body {
+      background: #f5f6f8;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .cart-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .cart-card img {
+      width: 80px;
+      border-radius: 8px;
+    }
+    .cart-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .quantity-input {
+      width: 70px;
+      text-align: center;
+    }
+    .btn-orange {
+      background: linear-gradient(45deg, #ffb84d, #ff9933);
+      border: none;
+      color: #fff;
+      font-weight: 600;
+      border-radius: 8px;
+      padding: 8px 18px;
+    }
+    .btn-orange:hover {
+      background: linear-gradient(45deg, #ff9933, #ff751a);
+    }
+    .checkout-box {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      padding: 25px;
+    }
+    .checkout-box h5 {
+      font-weight: 700;
+    }
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 1rem;
+    }
+    .total-row {
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+    .coupon-box {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .btn-remove {
+      border: none;
+      background: none;
+      color: #dc3545;
+      font-size: 1.2rem;
+    }

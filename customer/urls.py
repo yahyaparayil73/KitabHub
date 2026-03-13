@@ -2,19 +2,19 @@ from django.urls import path
 from . import views
 app_name='customer'
 urlpatterns=[
-    path('customer_home',views.customer_home,name='home'),
-    path('ccheckout',views.customer_checkout,name='checkout'),
+    
     path('cmycart',views.customer_mycart,name='mycart'),
     path('cchangepassword',views.customer_changepassword,name='changepassword'),
-    path('cproductdetails/<int:p_id>',views.customer_productdetails,name='productdetails'),
+    path('product_details/<int:pid>/', views.product_details, name='product_details'),
     path('cprofile',views.customer_profile,name='customer_profile'),
+    path('ccustomer_home/<int:cat_id>',views.customer_home_filter,name='home_filter'),
+    path('ccustomer_home_a', views.customer_home, name='home'),
+    path("search/", views.search_books, name="search_books"),
     path('cmyorders',views.customer_myorders,name='myorders'),
     path('c_logout',views.customer_logout,name='customer_logout'),
     path('master_customer',views.master_customer,name='master_customer'),
-    path('change_quantity',views.change_quantity,name ='change_quantity'),
-    path('info',views.info,name ='info'),
-    path('delete_item/<int:item_id>',views.delete_item, name='delete_item'),
-    path('total_price',views.total_price, name='total_price'),
-
+    path('update_quantity',views.update_quantity,name ='update_quantity'),
+    path('cust_view_prod',views.cust_view_prod,name ='cust_view_prod'),
+    path('delete_item', views.delete_item, name='delete_item')
 
 ]

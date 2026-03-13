@@ -1,0 +1,118 @@
+{% extends 'ecom_admin/admin_master.html' %}
+{% load static %}
+
+{% block title %}
+<title>Merchant Registry | Root Terminal</title>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    
+    <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-6">
+        <div>
+            <h1 class="serif-title text-4xl text-slate-900 tracking-tight">Merchant Registry</h1>
+            <p class="text-slate-400 text-[10px] font-black uppercase tracking-[4px] mt-2">Active Partnership Directory</p>
+        </div>
+        
+        <div class="flex items-center gap-4 w-full md:w-auto">
+            <div class="relative flex-1 md:w-64">
+                <i class="bi bi-filter-left absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" placeholder="Filter by name or ID..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-100 rounded-xl text-xs font-bold outline-none focus:border-black transition-all shadow-sm">
+            </div>
+            <div class="bg-black text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg">
+                Total: {{ sellers.count }}
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-100">
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Master ID</th>
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Merchant Profile</th>
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact Grid</th>
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Location</th>
+                        <th class="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Auth Status</th>
+                        <th class="px-8 py-6 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Operations</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    {% for seller in sellers %}
+                    <tr class="hover:bg-slate-50/50 transition-all group">
+                        <td class="px-8 py-6">
+                            <span class="text-xs font-mono font-bold text-slate-400 tracking-tighter">#SR-{{ seller.id }}</span>
+                        </td>
+                        
+                        <td class="px-8 py-6">
+                            <div class="flex items-center gap-4">
+                                <div class="relative">
+                                    <img src="{{ seller.s_image.url }}" class="w-12 h-12 rounded-2xl object-cover border border-slate-100 group-hover:scale-105 transition-transform">
+                                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-black text-slate-900 leading-none mb-1">{{ seller.s_name | title }}</p>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase">Registered Seller</p>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="px-8 py-6">
+                            <div class="space-y-1">
+                                <p class="text-[11px] font-bold text-slate-600 flex items-center gap-2">
+                                    <i class="bi bi-envelope text-slate-300"></i> {{ seller.s_email }}
+                                </p>
+                                <p class="text-[11px] font-bold text-slate-600 flex items-center gap-2">
+                                    <i class="bi bi-phone text-slate-300"></i> +91 {{ seller.s_mobile }}
+                                </p>
+                            </div>
+                        </td>
+
+                        <td class="px-8 py-6">
+                            <p class="text-xs font-medium text-slate-500 leading-relaxed max-w-[180px]">
+                                {{ seller.s_address | title }}
+                            </p>
+                        </td>
+
+                        <td class="px-8 py-6">
+                            <span class="px-3 py-1 bg-slate-100 text-slate-900 text-[9px] font-black uppercase tracking-widest rounded-lg border border-slate-200">
+                                Active Sync
+                            </span>
+                        </td>
+
+                        <td class="px-8 py-6 text-right">
+                            <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="p-2 bg-slate-50 text-slate-400 hover:text-black hover:bg-slate-100 rounded-lg transition-all" title="Detailed View">
+                                    <i class="bi bi-eye-fill"></i>
+                                </button>
+                                <a href="{% url 'ecom_admin:remove_seller' seller.id %}" 
+                                   class="p-2 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" 
+                                   onclick="return confirm('Archive this merchant? This cannot be undone.')">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-8 py-20 text-center">
+                            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-200">
+                                <i class="bi bi-person-x text-2xl"></i>
+                            </div>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">No Merchants Found in Registry</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styling for the table scrolling on mobile */
+    .overflow-x-auto::-webkit-scrollbar { height: 4px; }
+    .overflow-x-auto::-webkit-scrollbar-thumb { background: #000; border-radius: 10px; }
+</style>
+{% endblock %}
