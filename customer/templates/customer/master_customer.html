@@ -40,6 +40,9 @@
             opacity: 1;
             pointer-events: auto;
         }
+        html {
+        scroll-behavior: smooth;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -154,6 +157,14 @@
         </div>
     </nav>
 
+    <button 
+        id="backToTop" 
+        class="fixed bottom-8 right-8 w-14 h-14 bg-slate-900 text-white rounded-2xl shadow-2xl flex items-center justify-center transition-all duration-500 translate-y-24 opacity-0 z-[100] hover:bg-emerald-600 hover:-translate-y-1 active:scale-95 group"
+        onclick="scrollToTop()">
+        <i class="bi bi-arrow-up text-xl group-hover:animate-bounce"></i>
+        <div class="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+    </button>
+
     <main class="min-h-screen">
         {% block content %}{% endblock %}
     </main>
@@ -195,6 +206,25 @@
                 menu.classList.remove('active');
             }
         });
+        const backToTopBtn = document.getElementById('backToTop');
+
+        window.onscroll = function() {
+            // Show button after scrolling down 400px
+            if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+                backToTopBtn.classList.remove('translate-y-24', 'opacity-0');
+                backToTopBtn.classList.add('translate-y-0', 'opacity-100');
+            } else {
+                backToTopBtn.classList.remove('translate-y-0', 'opacity-100');
+                backToTopBtn.classList.add('translate-y-24', 'opacity-0');
+            }
+        };
+
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
     </script>
 </body>
 </html>
