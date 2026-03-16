@@ -1,0 +1,45 @@
+{% for product in products %}
+<div class="book-grid-card group">
+    <div class="book-cover-ratio relative rounded-xl overflow-hidden mb-3 bg-slate-50">
+        {% if product.p_image %}
+            <img src="{{ product.p_image.url }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+        {% else %}
+            <div class="w-full h-full flex items-center justify-center bg-emerald-50">
+                <i class="bi bi-journal-text text-emerald-200 text-3xl"></i>
+            </div>
+        {% endif %}
+        
+        {% if product.best_seller == 'Yes' %}
+        <div class="absolute top-2 right-2">
+            <i class="bi bi-bookmark-star-fill text-emerald-500 text-lg drop-shadow-sm"></i>
+        </div>
+        {% endif %}
+
+        <div class="absolute inset-0 bg-[#064e3b]/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-4">
+            <p class="text-white text-[8px] font-black uppercase tracking-widest mb-3">Ref: #{{ product.p_number }}</p>
+            <a href="{% url 'customer:product_details' product.id %}" class="w-full">
+                <button class="w-full bg-emerald-500 text-white py-2.5 rounded-lg font-black text-[9px] uppercase tracking-widest hover:bg-white hover:text-[#064e3b] transition-all">
+                    View Details
+                </button>
+            </a>
+        </div>
+    </div>
+
+    <div class="space-y-1">
+        <h3 class="font-bold text-[13px] text-slate-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+            {{ product.p_name|title }}
+        </h3>
+        <div class="flex justify-between items-center text-[10px]">
+            <p class="text-slate-400 font-medium truncate max-w-[65%]">{{ product.p_author }}</p>
+            <p class="font-black text-emerald-800">₹{{ product.p_price|floatformat:0 }}</p>
+        </div>
+        <div class="flex gap-2 pt-1">
+            <span class="text-[8px] font-bold text-slate-300 uppercase tracking-widest">{{ product.p_genre }}</span>
+        </div>
+    </div>
+</div>
+{% empty %}
+<div class="col-span-full py-32 text-center">
+    <p class="text-[10px] font-black text-slate-300 uppercase tracking-[4px]">No records found in this archive section</p>
+</div>
+{% endfor %}

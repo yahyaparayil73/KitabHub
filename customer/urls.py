@@ -3,7 +3,6 @@ from . import views
 app_name='customer'
 urlpatterns=[
     
-    path('cmycart',views.customer_mycart,name='mycart'),
     path('cchangepassword',views.customer_changepassword,name='changepassword'),
     path('product_details/<int:pid>/', views.product_details, name='product_details'),
     path('cprofile',views.customer_profile,name='customer_profile'),
@@ -13,8 +12,10 @@ urlpatterns=[
     path('cmyorders',views.customer_myorders,name='myorders'),
     path('c_logout',views.customer_logout,name='customer_logout'),
     path('master_customer',views.master_customer,name='master_customer'),
-    path('update_quantity',views.update_quantity,name ='update_quantity'),
     path('cust_view_prod',views.cust_view_prod,name ='cust_view_prod'),
-    path('delete_item', views.delete_item, name='delete_item')
+    path('view_cart/', views.view_cart, name='view_cart'),
+    path('add-to-archive/<int:pid>/', views.add_to_cart, name='add_to_cart'),
+    path('update-cart-qty/', views.update_cart_quantity, name='update_cart_quantity'),
+    path('remove-from-cart/<int:cart_id>/', views.remove_from_cart, name='remove_from_cart'),
 
 ]

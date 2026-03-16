@@ -6,9 +6,11 @@ from customer.models import Cart
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import logout
 from django.db import transaction
+from django.contrib import messages
 import datetime  
 from seller.decorators import auth_customer
 from django.db.models import Q
+from django.template.loader import render_to_string
 from django.db import connection
 import time
 import os     
@@ -62,52 +64,63 @@ def search_books(request):
     return JsonResponse({"results": results})
 
 @auth_customer
-def customer_mycart(request):  
-    # customer = request.session['customer']
-    # if not customer:
-    #         return redirect('customer:login')
-    # cust = Cart.objects.get(customer_id = customer)
-    # cust_id = cust.id
-    # cart_itms = Cart_items.objects.filter(Cart_id = cust_id)
-    return render(request, 'customer/my cart.html')
+def add_to_cart(request, pid):
+    
+    customer_id = request.session['customer']
+    product = get_object_or_404(Product, id=pid)
+    exists = Cart.objects.filter(customer_id=customer_id, product_id=pid).exists()
+    
+    if exists:
+        messages.info(request, "This volume is already in your selection.")
+        return redirect('customer:view_cart') # Go straight to cart if already there
+    
+    Cart.objects.create(customer_id=customer_id, product_id=pid, quantity=1)
+    messages.success(request, "Archive updated: Volume added to selections.")
+    return redirect('customer:view_cart')
 
 @auth_customer
-def update_quantity(request):
-    msg = ''
-    if request.method == 'POST':
-        customer = request.session['customer']
-        if not customer:
-            return redirect('customer:login')
-        cust = Cart.objects.get(customer_id = customer)
-        cust_id = cust.id
-        item_id = request.POST.get('product_id') 
-        qty = int(request.POST.get('quantity'))                                                 #User entered quantity
-        price = int(request.POST.get('amount'))  
-        sub_total = price * qty  
-        cart_itm = Cart_items.objects.get(product_id=item_id,Cart_id =cust_id)                  #Get cart item
-        cart_itm.quantity = qty
-        cart_itm.sub_total = sub_total
-        cart_itm.save()                                                                         #update the cart quantity
-        itm = Product.objects.get(id = item_id)
-        qnty = itm.p_stock
-        if qty > qnty: 
-            msg = 'Out of Stock'
-        else:
-            msg = 'In Stock'
-        return JsonResponse({'status': 'ok', 'message': msg})
+def view_cart(request):
+    
+    cart_items = Cart.objects.filter(customer_id=request.session['customer'])
+    grand_total = sum(item.total_price for item in cart_items)
+    
+    return render(request, 'customer/my cart.html', {
+        'cart_items': cart_items,
+        'grand_total': grand_total
+    })
 
-def delete_item(request):
-    if request.method == 'POST':
-        customer = request.session['customer']
-        if not customer:
-            return redirect('customer:login')
-        cust = Cart.objects.get(customer_id = customer)
-        cust_id = cust.id
-        product_id = request.POST.get('product_id')
-        cart_item = Cart_items.objects.filter(product_id=product_id,Cart_id =cust_id)
-        # print(cart_item.)
-        cart_item.delete()
-        return JsonResponse({'status': 'ok'})
+@auth_customer
+def update_cart_quantity(request):
+    # This handles the AJAX real-time updates
+    cart_id = request.GET.get('cart_id')
+    action = request.GET.get('action')
+    item = get_object_or_404(Cart, id=cart_id)
+    
+    if action == 'plus':
+        item.quantity += 1
+    elif action == 'minus' and item.quantity > 1:
+        item.quantity -= 1
+    
+    item.save()
+    return JsonResponse({
+        'status': 'success',
+        'qty': item.quantity,
+        'item_total': item.total_price,
+        'grand_total': sum(i.total_price for i in Cart.objects.filter(customer=item.customer))
+    })
+
+def remove_from_cart(request, cart_id):
+    # Security: Ensure the item belongs to the logged-in customer
+    if 'customer' not in request.session:
+        return redirect('common:customer_login')
+        
+    item = get_object_or_404(Cart, id=cart_id, customer_id=request.session['customer'])
+    product_name = item.product.p_name # Store name for the success message
+    item.delete()
+    
+    messages.success(request, f"'{product_name}' has been removed from your archive.")
+    return redirect('customer:view_cart')
+
 
 @auth_customer
 def customer_myorders(request):
@@ -118,11 +131,21 @@ def product_details(request, pid):
     product = get_object_or_404(Product, id=pid)
     related_products = Product.objects.filter(p_genre=product.p_genre).exclude(id=pid)[:4]
     
+    # Check if the product is already in the user's cart
+    is_in_cart = False
+    if 'customer' in request.session:
+        is_in_cart = Cart.objects.filter(
+            customer_id=request.session['customer'], 
+            product_id=pid
+        ).exists()
+    
     context = {
         'product': product,
-        'related': related_products
+        'related': related_products,
+        'is_in_cart': is_in_cart # Pass this to the template
     }
-    # Changed space to underscore to match professional file naming
+    
+    # Recommended: ensure your filename is product_details.html (with underscore)
     return render(request, 'customer/product details.html', context)
 
 @auth_customer
@@ -148,25 +171,31 @@ def customer_profile(request):
 
 @auth_customer
 def cust_view_prod(request):
-    # Get all products or filter by search query
-    query = request.GET.get('q')
+    query = request.GET.get('q', '').strip()
+    genre = request.GET.get('genre')
+    request_type = request.GET.get('type') # 'live' or 'filter'
+
+    products = Product.objects.all().order_by('-id')
+
     if query:
-        products = Product.objects.filter(
+        products = products.filter(
             Q(p_name__icontains=query) | Q(p_author__icontains=query) | Q(p_genre__icontains=query)
-        ).order_by('-id')
-    else:
-        products = Product.objects.all().order_by('-id')
+        )
+    
+    if genre and genre != 'all':
+        products = products.filter(p_genre=genre)
 
-    customer_id = request.session.get('customer')
-    customer = None
-    if customer_id:
-        customer = Customer.objects.get(id=customer_id)
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        # CASE 1: Live Recommendations (Dropdown)
+        if request_type == 'live':
+            html = render_to_string('customer/includes/search_results_partial.html', {'products': products[:6]})
+            return JsonResponse({'html': html})
+        
+        # CASE 2: Main Grid Update (Filtering/Submit)
+        html = render_to_string('customer/includes/product_grid_partial.html', {'products': products})
+        return JsonResponse({'html': html, 'count': products.count()})
 
-    return render(request, 'customer/cust_view_prod.html', {
-        'products': products,
-        'customer': customer,
-        'query': query
-    })
+    return render(request, 'customer/cust_view_prod.html', {'products': products, 'query': query})
 
 @auth_customer
 def master_customer(request):

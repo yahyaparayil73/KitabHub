@@ -5,16 +5,34 @@
 <style>
     .book-grid-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     .book-grid-card:hover { transform: translateY(-4px); }
+    .book-cover-ratio { aspect-ratio: 10 / 15; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     
-    /* Optimized for high-density viewing */
-    .book-cover-ratio {
-        aspect-ratio: 10 / 15;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(0,0,0,0.05);
+    /* Live Filter Tab Styling */
+    .filter-tab {
+        padding: 8px 20px;
+        border-radius: 12px;
+        font-size: 9px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #94a3b8;
+        background: #f8fafc;
+        border: 1px solid transparent;
+        transition: all 0.3s ease;
+    }
+    .filter-tab.active {
+        background: #064e3b;
+        color: white;
+        box-shadow: 0 8px 15px rgba(6, 78, 59, 0.2);
+    }
+    #search-results-dropdown {
+        box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        scrollbar-width: thin;
+        scrollbar-color: #10b981 #f8fafc;
     }
 </style>
 
 <main class="min-h-screen bg-white">
-    
     <header class="bg-[#064e3b] pt-24 pb-10 px-8 lg:px-16">
         <div class="flex flex-col md:flex-row justify-between items-center gap-8">
             <div>
@@ -22,74 +40,100 @@
                 <p class="text-emerald-400 text-[8px] font-black uppercase tracking-[5px] mt-1">Cataloging System v2.0</p>
             </div>
 
-            <form method="GET" action="{% url 'customer:cust_view_prod' %}" class="w-full md:w-96 flex bg-white/5 border border-white/10 rounded-xl p-1 focus-within:border-emerald-500 transition-all">
-                <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Search by Author, Title or Genre..." 
-                    class="bg-transparent border-none outline-none px-4 py-2 text-[11px] w-full text-white placeholder-emerald-100/30">
-                <button type="submit" class="bg-emerald-500 text-white px-5 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-emerald-400 transition-all">
-                    Search
-                </button>
-            </form>
+            <div class="relative w-full md:w-96">
+                <form id="search-form" class="flex bg-white/5 border border-white/10 rounded-xl p-1 focus-within:border-emerald-500 transition-all">
+                    <input type="text" id="search-input" name="q" autocomplete="off" placeholder="Search volumes..." 
+                           class="bg-transparent border-none outline-none px-4 py-2 text-[11px] w-full text-white placeholder-emerald-100/30">
+                </form>
+                
+                <div id="search-results-dropdown" class="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl overflow-hidden z-[100] hidden border border-slate-100">
+                    <div id="results-load-area" class="max-h-[380px] overflow-y-auto">
+                        </div>
+                </div>
+            </div>
         </div>
     </header>
 
     <div class="max-w-[1600px] mx-auto px-6 lg:px-12 py-10">
-        
+        <div class="flex flex-wrap gap-3 mb-10">
+            <button class="filter-tab active" data-genre="all">All Volumes</button>
+            <button class="filter-tab" data-genre="Fiction">Fiction</button>
+            <button class="filter-tab" data-genre="Non-fiction">Non-Fiction</button>
+            <button class="filter-tab" data-genre="Biography">Biography</button>
+            <button class="filter-tab" data-genre="Self-help">Self-Help</button>
+            <button class="filter-tab" data-genre="Business">Business</button>
+            
+        </div>
+
         <div class="flex items-center justify-between mb-8 border-b border-slate-100 pb-4">
             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                {{ products.count }} Volumes Available in Store
+                <span id="product-count">{{ products.count }}</span> Volumes Available in Archive
             </p>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-6 gap-y-12">
-            
-            {% for product in products %}
-            <div class="book-grid-card group">
-                <div class="book-cover-ratio relative rounded-xl overflow-hidden mb-3 bg-slate-50">
-                    {% if product.p_image %}
-                        <img src="{{ product.p_image.url }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                    {% else %}
-                        <div class="w-full h-full flex items-center justify-center bg-emerald-50">
-                            <i class="bi bi-journal-text text-emerald-200 text-3xl"></i>
-                        </div>
-                    {% endif %}
-                    
-                    {% if product.best_seller == 'Yes' %}
-                    <div class="absolute top-2 right-2">
-                        <i class="bi bi-bookmark-star-fill text-emerald-500 text-lg drop-shadow-sm"></i>
-                    </div>
-                    {% endif %}
-
-                    <div class="absolute inset-0 bg-[#064e3b]/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-4">
-                        <p class="text-white text-[8px] font-black uppercase tracking-widest mb-3">Ref: #{{ product.p_number }}</p>
-                        
-                        <a href="{% url 'customer:product_details' product.id %}" class="w-full">
-                            <button class="w-full bg-emerald-500 text-white py-2.5 rounded-lg font-black text-[9px] uppercase tracking-widest hover:bg-white hover:text-[#064e3b] transition-all">
-                                View Details
-                            </button>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="space-y-1">
-                    <h3 class="font-bold text-[13px] text-slate-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
-                        {{ product.p_name|title }}
-                    </h3>
-                    <div class="flex justify-between items-center text-[10px]">
-                        <p class="text-slate-400 font-medium truncate max-w-[65%]">{{ product.p_author }}</p>
-                        <p class="font-black text-emerald-800">₹{{ product.p_price|floatformat:0 }}</p>
-                    </div>
-                    <div class="flex gap-2 pt-1">
-                        <span class="text-[8px] font-bold text-slate-300 uppercase tracking-widest">{{ product.p_genre }}</span>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <div class="col-span-full py-32 text-center">
-                <p class="text-[10px] font-black text-slate-300 uppercase tracking-[4px]">No records found for current query</p>
-            </div>
-            {% endfor %}
-
+        <div id="book-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-6 gap-y-12 transition-opacity duration-300">
+            {% include 'customer/includes/product_grid_partial.html' %}
         </div>
     </div>
 </main>
+
+<script>
+const searchInput = document.getElementById('search-input');
+const resultsDiv = document.getElementById('search-results');
+const resultsContent = document.getElementById('results-content');
+const bookContainer = document.getElementById('book-container');
+let debounceTimer;
+
+// LIVE SEARCH KEYBOARD LISTENER
+searchInput.addEventListener('input', function() {
+    const q = this.value.trim();
+    
+    if (q.length < 2) {
+        dropdown.classList.add('hidden');
+        return;
+    }
+
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        fetch(`?q=${q}&type=live`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            loadArea.innerHTML = data.html;
+            dropdown.classList.remove('hidden');
+        });
+    }, 250); // Fast response
+});
+
+// HIDE DROPDOWN WHEN CLICKING OUTSIDE
+document.addEventListener('click', function(e) {
+    if (!document.getElementById('search-form').contains(e.target)) {
+        resultsDiv.classList.add('hidden');
+    }
+});
+
+// GENRE FILTRATION (Keep your existing logic, but clear search)
+document.querySelectorAll('.filter-tab').forEach(button => {
+    button.addEventListener('click', function() {
+        const genre = this.getAttribute('data-genre');
+        document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        searchInput.value = ''; 
+        resultsDiv.classList.add('hidden');
+        
+        bookContainer.style.opacity = '0.3';
+        fetch(`?genre=${genre}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            bookContainer.innerHTML = data.html;
+            document.getElementById('product-count').innerText = data.count;
+            bookContainer.style.opacity = '1';
+        });
+    });
+});
+</script>
 {% endblock %}

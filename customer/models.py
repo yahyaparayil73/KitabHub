@@ -7,20 +7,16 @@ from django.utils import timezone
 
 class Cart(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE) # Ensure you have a Product model
+    quantity = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def total_price(self):
+        return self.product.p_price * self.quantity
     
-  
     class Meta:
         db_table = 'cart'
-
-# class Cart_items(models.Model):
-#     Cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
-#     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-#     quantity = models.PositiveIntegerField(default=1)
-#     sub_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-
-
-#     class Meta:
-#         db_table = 'cart_items'
 
 class Order(models.Model):
     # Status Choices for the Admin "Protocol" column
@@ -30,25 +26,13 @@ class Order(models.Model):
         ('Delivered', 'Delivered'),
         ('Cancelled', 'Cancelled'),
     ]
-
-    # Links (ForeignKeys)
-    # Using 'on_delete=models.CASCADE' means if a user is deleted, their orders are too.
-    # 1. Reference Customer from your 'common' or 'customer' app
     customer = models.ForeignKey('common.Customer', on_delete=models.CASCADE, related_name='orders')
-    
-    # 2. Reference Product from your 'seller' or 'product' app
     product = models.ForeignKey('seller.Product', on_delete=models.CASCADE, related_name='ordered_product')
-    
-    # 3. Reference Seller from your 'seller' app
     seller = models.ForeignKey('common.Seller', on_delete=models.CASCADE, related_name='seller_orders')
-
-    # Data Fields
     o_quantity = models.PositiveIntegerField(default=1)
     o_total_price = models.DecimalField(max_digits=12, decimal_places=2) # e.g. 10000.00
     o_date = models.DateTimeField(default=timezone.now)
     o_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
-    
-    # Advanced Admin Tracking
     o_address_snapshot = models.TextField() # Keeps the address even if customer changes profile later
     o_transaction_id = models.CharField(max_length=100, unique=True, null=True)
 
@@ -56,8 +40,7 @@ class Order(models.Model):
         return f"Order #{self.id} - {self.customer.c_name}"
 
     class Meta:
-        verbose_name = "Master Order"
-        verbose_name_plural = "Master Orders"
+        db_table = 'orders'
 
 
 # class OrderItem(models.Model):

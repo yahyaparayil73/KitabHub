@@ -19,6 +19,10 @@
         transition: all 0.3s ease;
     }
     .footer-pill:hover { background: rgba(16, 185, 129, 0.2); border-color: #10b981; }
+
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
 </style>
 
 <main class="space-y-32">
@@ -29,51 +33,63 @@
             <span class="text-emerald-400 font-bold text-[9px] tracking-[6px] uppercase mb-4">Spring Edition 2026</span>
             <h1 class="serif-title text-6xl lg:text-8xl text-white leading-tight mb-8">Curated for the <br><span class="italic font-light text-emerald-300">Conscious Mind.</span></h1>
             <div class="flex gap-4">
-                <button class="bg-white text-[#064e3b] px-8 py-4 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-emerald-400 hover:text-white transition-all shadow-2xl">Browse Archive</button>
+                <a href="{% url 'customer:cust_view_prod' %}">
+                    <button class="bg-white text-[#064e3b] px-8 py-4 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-emerald-400 hover:text-white transition-all shadow-2xl">
+                        Browse Archive
+                    </button>
+                </a>
                 <button class="border border-white/20 text-white px-8 py-4 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all">Our Story</button>
             </div>
         </div>
     </section>
 
-    <section class="px-8 lg:px-24">
+   <section class="px-8 lg:px-24 py-12">
         <div class="flex justify-between items-end mb-12">
             <div>
                 <h2 class="serif-title text-4xl text-slate-900">Best Sellers</h2>
                 <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-2">Recently added to the vault</p>
             </div>
             <div class="flex gap-2">
-                <button class="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center hover:bg-emerald-50 transition-all"><i class="bi bi-chevron-left"></i></button>
-                <button class="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center hover:bg-emerald-50 transition-all"><i class="bi bi-chevron-right"></i></button>
+                <button id="prevBtn" class="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center hover:bg-emerald-50 transition-all">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <button id="nextBtn" class="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center hover:bg-emerald-50 transition-all">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+        <div id="sliderContainer" class="flex gap-8 overflow-x-auto scroll-smooth no-scrollbar py-4" style="scrollbar-width: none; -ms-overflow-style: none;">
             {% for product in new_arrvl %}
-            <div class="compact-card group cursor-pointer">
-                <div class="relative aspect-[3/4] rounded-3xl overflow-hidden mb-4 shadow-lg bg-slate-100">
+            <div class="compact-card group cursor-pointer min-w-[calc(50%-1rem)] md:min-w-[calc(33.33%-1.5rem)] lg:min-w-[calc(20%-1.6rem)] flex-shrink-0">
+                
+                <div class="relative w-full rounded-3xl overflow-hidden mb-4 shadow-lg bg-slate-100" 
+                    style="padding-top: 133%; /* This creates a perfect 3:4 portrait ratio */">
+                    
                     {% if product.p_image %}
-                        <img src="{{ product.p_image.url }}" alt="{{ product.p_name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        <img src="{{ product.p_image.url }}" 
+                            alt="{{ product.p_name }}" 
+                            class="absolute top-0 left-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                     {% else %}
-                        <div class="w-full h-full flex items-center justify-center bg-slate-200">
+                        <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-slate-200">
                             <i class="bi bi-book text-slate-400 text-3xl"></i>
                         </div>
                     {% endif %}
                     
-                    <div class="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
-                        <button class="w-full bg-white/90 backdrop-blur py-3 rounded-xl text-[#064e3b] font-bold text-[9px] uppercase tracking-widest shadow-lg">Quick Add</button>
+                    <div class="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0 z-10">
+                        <a href="{% url 'customer:product_details' product.id %}" class="w-full">
+                            <button class="w-full bg-emerald-500 text-white py-2.5 rounded-lg font-black text-[9px] uppercase tracking-widest hover:bg-white hover:text-[#064e3b] transition-all">
+                                Quick View
+                            </button>
+                        </a>
                     </div>
                 </div>
                 
-                <h4 class="font-bold text-sm text-slate-800 truncate">{{ product.p_name|title }}</h4>
-                
-                <div class="flex justify-between items-center mt-1">
-                    <p class="text-slate-400 text-[10px] uppercase tracking-widest">{{ product.p_author }}</p>
-                    <p class="text-emerald-600 font-bold text-xs">₹{{ product.p_price }}</p>
+                <h4 class="font-bold text-sm text-slate-800 truncate px-1">{{ product.p_name|title }}</h4>
+                <div class="flex justify-between items-center mt-1 px-1">
+                    <p class="text-slate-400 text-[10px] uppercase tracking-widest truncate mr-2">{{ product.p_author }}</p>
+                    <p class="text-emerald-600 font-bold text-xs">₹{{ product.p_price|floatformat:0 }}</p>
                 </div>
-            </div>
-            {% empty %}
-            <div class="col-span-full py-20 text-center">
-                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-[4px]">The vault is currently being restocked.</p>
             </div>
             {% endfor %}
         </div>
@@ -281,4 +297,37 @@
         </div>
     </div>
 </footer>
+
+<script>
+    const container = document.getElementById('sliderContainer');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    const getScrollAmount = () => {
+        const card = container.querySelector('.compact-card');
+        return card ? card.offsetWidth + 32 : 300; 
+    };
+
+    // Button Clicks
+    nextBtn.addEventListener('click', () => {
+        container.scrollLeft += getScrollAmount();
+    });
+
+    prevBtn.addEventListener('click', () => {
+        container.scrollLeft -= getScrollAmount();
+    });
+
+    // AUTO-SCROLL LOGIC
+    let autoScroll = setInterval(() => {
+        // If we reach the end, go back to the start
+        if (container.scrollLeft + container.offsetWidth >= container.scrollWidth - 10) {
+            container.scrollLeft = 0;
+        } else {
+            container.scrollLeft += getScrollAmount();
+        }
+    }, 5000); // 5 Seconds
+
+    // Optional: Stop auto-scroll when user interacts
+    container.addEventListener('mouseenter', () => clearInterval(autoScroll));
+</script>
 {% endblock %}

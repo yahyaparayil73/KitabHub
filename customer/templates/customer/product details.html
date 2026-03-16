@@ -98,12 +98,21 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <button class="flex-1 bg-[#065f46] text-white py-6 rounded-2xl text-[11px] font-bold uppercase tracking-[4px] shadow-2xl shadow-emerald-900/30 hover:bg-black transition-all transform hover:-translate-y-1">
+                {% if is_in_cart %}
+                    <a href="{% url 'customer:view_cart' %}" 
+                    class="flex-1 bg-black text-white py-6 rounded-2xl text-center text-[11px] font-bold uppercase tracking-[4px] shadow-2xl shadow-emerald-900/30 transition-all transform hover:-translate-y-1">
+                        View in Archive
+                    </a>
+                {% else %}
+                    <a href="{% url 'customer:add_to_cart' product.id %}" 
+                    class="flex-1 bg-[#065f46] text-white py-6 rounded-2xl text-center text-[11px] font-bold uppercase tracking-[4px] shadow-2xl shadow-emerald-900/30 hover:bg-black transition-all transform hover:-translate-y-1">
                         Request Volume
-                    </button>
-                    <button class="px-10 py-6 border border-slate-200 rounded-2xl text-slate-400 hover:text-emerald-600 hover:border-emerald-200 transition-all">
-                        <i class="bi bi-bookmark-plus text-xl"></i>
-                    </button>
+                    </a>
+                {% endif %}
+
+                <button class="px-10 py-6 border border-slate-200 rounded-2xl text-slate-400 hover:text-emerald-600 hover:border-emerald-200 transition-all">
+                    <i class="bi bi-bookmark-plus text-xl"></i>
+                </button>
                 </div>
 
             </div>

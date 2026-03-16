@@ -13,6 +13,11 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 from pathlib import Path
 import os
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# create logs folder if it doesn't exist
+os.makedirs(os.path.join(BASE_DIR, "logs"), exist_ok=True)
+
 # import mimetypes
 # mimetypes.add_type("text/css",".css",True)
 # mimetypes.add_type("text/js",".js",True)
@@ -38,8 +43,8 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'customer',
     'common',
+    'customer',
     'seller',
     'ecom_admin',
     'rest_framework',
@@ -75,8 +80,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                # 'common.context_processors.customer_name',
-                # 'customer.context_processors.cart_item_count',
+                'customer.context_processors.cart_count',
             ],
         },
     },

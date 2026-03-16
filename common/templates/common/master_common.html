@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Socio Books | Global Archive{% endblock %}</title>
+    <title>{% block title %}Kitab Hub | Global Archive{% endblock %}</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
@@ -35,7 +35,7 @@
                 <div class="w-10 h-10 bg-[#064e3b] rounded-xl flex items-center justify-center text-emerald-400">
                     <i class="bi bi-book-half text-xl"></i>
                 </div>
-                <span class="serif-title text-xl font-bold tracking-tight text-slate-900">Socio<span class="text-emerald-700">Books</span></span>
+                <span class="serif-title text-xl font-bold tracking-tight text-slate-900">Kitab<span class="text-emerald-700">Hub</span></span>
             </a>
 
             <div class="hidden md:flex items-center gap-10">
@@ -45,7 +45,7 @@
             </div>
 
             <div class="flex items-center gap-6">
-                <a href="{% url 'customer:mycart' %}" class="relative group">
+                <a href="{% url 'customer:view_cart' %}" class="relative group">
                     <i class="bi bi-bag text-xl text-slate-800 group-hover:text-emerald-700 transition-colors"></i>
                     <span class="absolute -top-2 -right-2 bg-emerald-600 text-white text-[8px] font-black w-4 h-4 flex items-center justify-center rounded-full border-2 border-white shadow-sm">
                         {{ cart_count|default:"0" }}
@@ -95,7 +95,7 @@
     <footer class="bg-white border-t border-slate-100 pt-20 pb-10 px-8 lg:px-20 mt-20">
         <div class="max-w-[1600px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 border-b border-slate-50 pb-16">
             <div class="col-span-1 md:col-span-2">
-                <h3 class="serif-title text-2xl text-slate-900 mb-4">Socio Books</h3>
+                <h3 class="serif-title text-2xl text-slate-900 mb-4">Kitab Hub</h3>
                 <p class="text-slate-400 text-sm font-light leading-relaxed max-w-sm">
                     A global digital archive dedicated to the preservation and distribution of physical narratives in a modern world.
                 </p>

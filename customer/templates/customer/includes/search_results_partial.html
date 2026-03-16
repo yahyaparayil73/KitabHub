@@ -1,0 +1,25 @@
+{% for product in products %}
+<a href="{% url 'customer:product_details' product.id %}" class="flex items-center gap-4 p-4 hover:bg-emerald-50 transition-all border-b border-slate-50 last:border-0 group">
+    <div class="w-10 h-14 bg-slate-100 rounded overflow-hidden flex-shrink-0">
+        {% if product.p_image %}
+            <img src="{{ product.p_image.url }}" class="w-full h-full object-cover">
+        {% else %}
+            <div class="w-full h-full flex items-center justify-center bg-emerald-50">
+                <i class="bi bi-book text-emerald-200"></i>
+            </div>
+        {% endif %}
+    </div>
+    <div class="flex-1 min-w-0">
+        <h4 class="text-[11px] font-bold text-slate-900 truncate group-hover:text-emerald-700">{{ product.p_name|title }}</h4>
+        <p class="text-[9px] text-slate-400 truncate">{{ product.p_author }}</p>
+        <div class="flex items-center gap-2 mt-0.5">
+            <span class="text-[8px] font-black text-emerald-600 uppercase">{{ product.p_genre }}</span>
+            <span class="text-[9px] font-bold text-slate-800 ml-auto">₹{{ product.p_price|floatformat:0 }}</span>
+        </div>
+    </div>
+</a>
+{% empty %}
+<div class="p-6 text-center">
+    <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest">No volumes cataloged</p>
+</div>
+{% endfor %}

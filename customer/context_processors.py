@@ -1,9 +1,15 @@
-# from .models import Cart, Cart_items
+from .models import Cart
 
-# def cart_item_count(request):
-
-#     customer_id = request.session['customer']
-#     cart = Cart.objects.get(customer_id=customer_id)
-#     cart_items = Cart_items.objects.filter(Cart_id=cart.id)
-#     cnt = cart_items.count()
-#     return {'item_cnt': cnt}
+def cart_count(request):
+    # Initialize count at 0
+    item_cnt = 0
+    
+    # Check if the customer is logged in via session
+    if 'customer' in request.session:
+        customer_id = request.session['customer']
+        # Count the number of unique items in the cart for this customer
+        item_cnt = Cart.objects.filter(customer_id=customer_id).count()
+        
+    return {
+        'item_cnt': item_cnt
+    }
