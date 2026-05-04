@@ -1,0 +1,28 @@
+{% extends 'customer/master_customer.html' %}
+{% block content %}
+<div class="py-40 text-center">
+    <h2 class="serif-title text-3xl mb-4">Secure Checkout</h2>
+    <p class="text-slate-500 mb-8 text-sm">Please do not refresh or go back.</p>
+    <button id="rzp-button" class="px-10 py-4 bg-slate-900 text-white rounded-2xl font-bold uppercase tracking-widest text-[10px]">
+        Pay Now ₹{{ order.total_amount }}
+    </button>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    var options = {
+        "key": "{{ razorpay_key }}",
+        "amount": "{{ amount }}",
+        "currency": "INR",
+        "name": "KitabHub",
+        "order_id": "{{ razorpay_order_id }}",
+        "handler": function (response){
+            // Redirect to the verification view upon success
+            window.location.href = `/customer/payment-verify/?order_id={{ order.order_id }}&payment_id=${response.razorpay_payment_id}&signature=${response.razorpay_signature}`;
+        },
+        "theme": { "color": "#064e3b" }
+    };
+    var rzp1 = new Razorpay(options);
+    window.onload = function(){ rzp1.open(); }
+</script>
+{% endblock %}

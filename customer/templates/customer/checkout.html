@@ -1,12 +1,105 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    this is the checkout section
-</body>
-</html>
+{% extends 'customer/master_customer.html' %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-8 py-16">
+    <div class="mb-12">
+        <p class="text-[9px] font-bold uppercase tracking-[4px] text-emerald-500 mb-1">Final Step</p>
+        <h1 class="serif-title text-4xl text-slate-900">Checkout Archive</h1>
+    </div>
+
+    <form method="POST" action="{% url 'customer:place_order' %}" class="grid grid-cols-12 gap-16">
+        {% csrf_token %}
+        
+        <div class="col-span-12 lg:col-span-7 space-y-12">
+            <div>
+            <h2 class="text-[10px] font-bold uppercase tracking-[5px] text-slate-400 mb-8">Shipping Manifest</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Recipient Name -->
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold uppercase text-slate-500 ml-2">Recipient Name</label>
+                    <input type="text" name="full_name" required 
+                        placeholder="John Doe" 
+                        value="{{ profile.c_name|default:'' }}" 
+                        class="w-full bg-slate-50 border-none rounded-2xl p-4 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all">
+                </div>
+
+                <!-- Contact Email -->
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold uppercase text-slate-500 ml-2">Contact Email</label>
+                    <input type="email" name="email" required 
+                        placeholder="john@example.com" 
+                        value="{{ profile.c_email|default:'' }}"
+                        class="w-full bg-slate-50 border-none rounded-2xl p-4 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all">
+                </div>
+
+                <!-- Delivery Address -->
+                <div class="col-span-full space-y-2">
+                    <label class="text-[10px] font-bold uppercase text-slate-500 ml-2">Delivery Address</label>
+                    <textarea name="address" required rows="4" 
+                        placeholder="42 Botanical Gardens, Kensington..." 
+                        class="w-full bg-slate-50 border-none rounded-2xl p-4 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all">{{ profile.c_address|default:'' }}</textarea>
+                </div>
+
+            </div>
+            </div>
+
+            <div>
+                <h2 class="text-[10px] font-bold uppercase tracking-[5px] text-slate-400 mb-6">Payment Method</h2>
+                <div class="p-6 border-2 border-emerald-100 bg-emerald-50/30 rounded-3xl flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white">
+                            <i class="bi bi-wallet2 text-lg"></i>
+                        </div>
+                        <p class="text-sm font-bold text-emerald-900">Cash on Delivery</p>
+                    </div>
+                    <span class="text-[9px] font-black uppercase text-emerald-600 tracking-widest">Active</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-span-12 lg:col-span-5">
+            <div class="bg-slate-900 rounded-[3rem] p-10 text-white sticky top-10 overflow-hidden relative">
+                <h2 class="text-[9px] font-bold uppercase tracking-[4px] text-emerald-400 mb-8 relative z-10">Order Summary</h2>
+                
+                <div class="space-y-6 mb-10 relative z-10 max-h-[300px] overflow-y-auto no-scrollbar">
+                    {% for item in cart_items %}
+                    <div class="flex justify-between items-center gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-16 rounded-xl overflow-hidden shrink-0">
+                                <img src="{{ item.product.p_image.url }}" class="w-full h-full object-cover">
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold">{{ item.product.p_name }}</p>
+                                <p class="text-[9px] text-slate-400">Qty: {{ item.quantity }}</p>
+                            </div>
+                        </div>
+                        <p class="text-xs font-bold text-emerald-400">₹{{ item.total_price }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="border-t border-white/10 pt-8 space-y-4 relative z-10">
+                    <div class="flex justify-between text-[10px] uppercase tracking-widest text-slate-400">
+                        <span>Archive Subtotal</span>
+                        <span>₹{{ grand_total }}</span>
+                    </div>
+                    <div class="flex justify-between text-[10px] uppercase tracking-widest text-slate-400">
+                        <span>Eco-Shipping</span>
+                        <span class="text-emerald-400">Free</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-4">
+                        <span class="serif-title text-2xl">Total</span>
+                        <span class="text-3xl font-bold text-emerald-400">₹{{ grand_total }}</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-emerald-500 text-white py-5 rounded-2xl font-black uppercase tracking-[3px] text-[10px] mt-10 hover:bg-white hover:text-slate-900 transition-all duration-500 relative z-10 shadow-xl shadow-emerald-500/20">
+                    Confirm Order Placement
+                </button>
+
+                <i class="bi bi-book-half absolute -bottom-10 -right-10 text-white/5 text-[150px] rotate-12"></i>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

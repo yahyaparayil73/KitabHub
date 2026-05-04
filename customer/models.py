@@ -28,15 +28,19 @@ class Order(models.Model):
         ('Delivered', 'Delivered'),
     )
 
-    # We use UUID for the URL to make it secure (SB-XXXXX)
-    order_id = models.CharField(max_length=20, unique=True, editable=False,null=True)
+    order_id = models.CharField(max_length=20, unique=True, editable=False, null=True)
     customer = models.ForeignKey('common.Customer', on_delete=models.CASCADE)
-    full_name = models.CharField(max_length=255,default = 0)
-    email = models.EmailField(default = 0)
+    full_name = models.CharField(max_length=255, default=0)
+    email = models.EmailField(default=0)
     shipping_address = models.TextField(default=0)
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2,null=True)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+    # --- NEW RAZORPAY FIELDS ---
+    razorpay_order_id = models.CharField(max_length=100, null=True, blank=True)
+    razorpay_payment_id = models.CharField(max_length=100, null=True, blank=True)
+    is_paid = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if not self.order_id:

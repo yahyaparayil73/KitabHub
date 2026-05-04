@@ -65,9 +65,11 @@
                         </div>
                     </div>
 
-                    <button class="w-full bg-[#064e3b] text-white py-6 rounded-2xl font-bold text-[10px] uppercase tracking-[4px] shadow-xl hover:bg-black transition-all group">
-                        Proceed to Checkout <i class="bi bi-arrow-right ms-2 group-hover:translate-x-2 transition-transform"></i>
-                    </button>
+                    <a href="{% url 'customer:checkout' %}" class="block w-full">
+                        <button class="w-full bg-[#064e3b] text-white py-6 rounded-2xl font-bold text-[10px] uppercase tracking-[4px] shadow-xl hover:bg-black transition-all group">
+                            Proceed to Checkout <i class="bi bi-arrow-right ms-2 group-hover:translate-x-2 transition-transform"></i>
+                        </button>
+                    </a>
                 </div>
             </div>
         </div>

@@ -2,7 +2,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from common.models import Customer
 from seller.models import Product
-from customer.models import Cart
+from customer.models import Cart,Order,OrderItem
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import logout
 from django.db import transaction
@@ -12,8 +12,19 @@ from seller.decorators import auth_customer
 from django.db.models import Q
 from django.template.loader import render_to_string
 from django.db import connection
+from django.conf import settings
 import time
-import os     
+import os  
+import razorpay
+
+# Replace with your ACTUAL keys from the Razorpay Dashboard
+RAZORPAY_KEY_ID = 'rzp_test_SkKtChnzWjXzue'
+RAZORPAY_KEY_SECRET = 'AfS2aXar5hfwT3QZ7fkiXlMR'
+
+client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+
+
+# client = razorpay.Client(auth=("rzp_test_SkKtChnzWjXzue", "AfS2aXar5hfwT3QZ7fkiXlMR"))
 
 @auth_customer
 def customer_home(request):
@@ -224,3 +235,150 @@ def customer_logout(request):
         pass
         
     return redirect('common:customer_login')
+
+def checkout(request):
+    # 1. Fetch cart items from the DATABASE, not the session
+    customer_id = request.session.get('customer')
+    customer_profile = Customer.objects.get(id=customer_id)
+    cart_items = Cart.objects.filter(customer_id=customer_id)
+
+    # 2. Redirect if the database cart is empty
+    if not cart_items.exists():
+        messages.warning(request, "Your cart is empty.")
+        return redirect('customer:view_cart')
+
+    # 3. Calculate Grand Total from the database objects
+    grand_total = sum(item.total_price for item in cart_items)
+
+    if request.method == 'POST':
+        full_name = request.POST.get('full_name')
+        email = request.POST.get('email')
+        address = request.POST.get('address')
+        
+        try:
+            with transaction.atomic():
+                # Create the Order
+                new_order = Order.objects.create(
+                    customer_id=customer_id,
+                    full_name=full_name,
+                    email=email,
+                    shipping_address=address,
+                    total_amount=grand_total
+                )
+
+                # Move items from Cart Table to OrderItem Table
+                for item in cart_items:
+                    # Check stock on the actual product
+                    if item.product.p_stock < item.quantity:
+                        raise Exception(f"{item.product.p_name} is out of stock.")
+
+                    OrderItem.objects.create(
+                        order=new_order,
+                        product=item.product,
+                        quantity=item.quantity,
+                        price_at_purchase=item.product.p_price
+                    )
+                    
+                    # Deduct Inventory
+                    item.product.p_stock -= item.quantity
+                    item.product.save()
+
+                # 4. Success: CLEAR THE DATABASE CART
+                cart_items.delete() 
+                
+                return redirect('customer:order_detail', order_id=new_order.order_id)
+
+        except Exception as e:
+            messages.error(request, str(e))
+            return redirect('customer:checkout')
+
+    return render(request, 'customer/checkout.html', {
+        'cart_items': cart_items,
+        'grand_total': grand_total,
+        'profile': customer_profile
+    })
+
+def place_order(request):
+    if request.method == 'POST':
+        customer_id = request.session.get('customer')
+        cart_items = Cart.objects.filter(customer_id=customer_id)
+        
+        if not cart_items.exists():
+            return redirect('customer:view_cart')
+
+        grand_total = sum(item.total_price for item in cart_items)
+        amount_paise = int(grand_total * 100) # Currency in INR (Paise)
+
+        try:
+            with transaction.atomic():
+                # 1. Create the Razorpay Order
+                razor_order = client.order.create({
+                    "amount": amount_paise,
+                    "currency": "INR",
+                    "payment_capture": "1"
+                })
+
+                # 2. Create the Pending Order in your DB
+                new_order = Order.objects.create(
+                    customer_id=customer_id,
+                    full_name=request.POST.get('full_name'),
+                    email=request.POST.get('email'),
+                    shipping_address=request.POST.get('address'),
+                    total_amount=grand_total,
+                    razorpay_order_id=razor_order['id'],
+                    status='Pending'
+                )
+
+                # 3. Hand over to the Payment Gateway Page
+                return render(request, 'customer/payment.html', {
+                    'order': new_order,
+                    'razorpay_order_id': razor_order['id'],
+                    'razorpay_key': RAZORPAY_KEY_ID,
+                    'amount': amount_paise
+                })
+
+        except Exception as e:
+            print(f"Error initializing order: {e}")
+            return redirect('customer:checkout')
+        
+def payment_verify(request):
+    order_id = request.GET.get('order_id')
+    payment_id = request.GET.get('payment_id')
+    signature = request.GET.get('signature')
+
+    try:
+        order = Order.objects.get(order_id=order_id)
+        
+        # Verify the signature cryptographically
+        client.utility.verify_payment_signature({
+            'razorpay_order_id': order.razorpay_order_id,
+            'razorpay_payment_id': payment_id,
+            'razorpay_signature': signature
+        })
+
+        # SUCCESS: Finalize the Order
+        with transaction.atomic():
+            order.is_paid = True
+            order.status = 'Paid'
+            order.razorpay_payment_id = payment_id
+            order.save()
+
+            # Move cart items to OrderItems and reduce stock
+            cart_items = Cart.objects.filter(customer=order.customer)
+            for item in cart_items:
+                OrderItem.objects.create(
+                    order=order,
+                    product=item.product,
+                    quantity=item.quantity,
+                    price_at_purchase=item.product.p_price
+                )
+                item.product.p_stock -= item.quantity
+                item.product.save()
+
+            # Clear the cart
+            cart_items.delete()
+
+        return redirect('customer:order_detail', order_id=order.order_id)
+
+    except Exception:
+        return render(request, 'customer/payment_failed.html')
