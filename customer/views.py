@@ -44,10 +44,22 @@ def customer_home(request):
         # If session is invalid, clear it and redirect
         request.session.flush()
         return redirect('customer:login')
+    
+    recently_viewed_ids = request.session.get('recently_viewed', [])
+    recently_viewed_products = []
+
+    if recently_viewed_ids:
+        # Fetch products matching the IDs preserved in the session
+        products_queryset = Product.objects.filter(id__in=recently_viewed_ids)
+        
+        # Sort them in the exact order they appear in the session list (most recent first)
+        product_map = {p.id: p for p in products_queryset}
+        recently_viewed_products = [product_map[p_id] for p_id in recently_viewed_ids if p_id in product_map]
 
     context = {
         'new_arrvl': new_arrivals,
-        'name': cust_nm
+        'name': cust_nm,
+        'recently_viewed': recently_viewed_products,
     }
     
     return render(request, 'customer/customer_home.html', context)
@@ -155,6 +167,24 @@ def product_details(request, pid):
         'related': related_products,
         'is_in_cart': is_in_cart # Pass this to the template
     }
+    if 'recently_viewed' not in request.session:
+        request.session['recently_viewed'] = []
+    
+    # 2. Get the existing list safely
+    recently_viewed_ids = request.session['recently_viewed']
+    
+    # 3. Clean-up logic: If the product is already in the list, remove it first (to bring it to the front)
+    if pid in recently_viewed_ids:
+        recently_viewed_ids.remove(pid)
+        
+    # 4. Insert the product ID at the very beginning of the list
+    recently_viewed_ids.insert(0, pid)
+    
+    # 5. Limit the list to the last 10 items so it stays clean
+    request.session['recently_viewed'] = recently_viewed_ids[:10]
+    
+    # Tell Django the session data has been updated
+    request.session.modified = True
     
     # Recommended: ensure your filename is product_details.html (with underscore)
     return render(request, 'customer/product details.html', context)

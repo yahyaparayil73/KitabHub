@@ -95,6 +95,77 @@
         </div>
     </section>
 
+    {% if recently_viewed %}
+    <section class="max-w-7xl mx-auto px-6 md:px-12 py-16 border-t border-slate-100">
+        <!-- Header Controls -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h2 class="text-[10px] font-bold uppercase tracking-[4px] text-slate-400 mb-2">Based on your history</h2>
+                <h3 class="serif-title text-2xl md:text-3xl text-slate-900">Recently Viewed Items</h3>
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div class="flex gap-2">
+                <button onclick="scrollCarousel(-1)" class="w-10 h-10 border border-slate-200 rounded-full flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all">
+                    <i class="bi bi-chevron-left text-sm"></i>
+                </button>
+                <button onclick="scrollCarousel(1)" class="w-10 h-10 border border-slate-200 rounded-full flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all">
+                    <i class="bi bi-chevron-right text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Horizontal Carousel Grid Container -->
+        <div id="recent-carousel" class="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-6 outline-none scrollbar-hide" style="scrollbar-width: none; -ms-overflow-style: none;">
+            
+            {% for product in recently_viewed %}
+            <!-- Premium Product Card Minimal Style -->
+            <div class="min-w-[240px] md:min-w-[280px] max-w-[280px] snap-start bg-white border border-slate-100 rounded-2xl p-4 flex flex-col justify-between hover:shadow-xl transition-all duration-300 group">
+                <div>
+                    <!-- Image Wrapper Container -->
+                    <div class="w-full h-64 bg-slate-50 rounded-xl overflow-hidden mb-4 relative flex items-center justify-center">
+                        {% if product.p_image %}
+                            <img src="{{ product.p_image.url }}" alt="{{ product.p_name }}" class="h-48 object-contain group-hover:scale-105 transition-all duration-500">
+                        {% else %}
+                            <i class="bi bi-book text-4xl text-slate-300"></i>
+                        {% endif %}
+                        
+                        <!-- Quick View Tag Icon Overlay -->
+                        <a href="{% url 'customer:product_details' product.id %}" class="absolute bottom-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-md rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-slate-900 hover:text-white">
+                            <i class="bi bi-eye text-xs"></i>
+                        </a>
+                    </div>
+
+                    <!-- Product Metas Details -->
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 mb-1">{{ product.p_category.cat_name }}</p>
+                    <h4 class="font-medium text-slate-800 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+                        <a href="{% url 'customer:product_details' product.id %}">{{ product.p_name }}</a>
+                    </h4>
+                    <p class="text-xs text-slate-400 mt-1 mb-3">By {{ product.p_author|default:"Unknown Author" }}</p>
+                </div>
+
+                <!-- Price & Interactive Action Bottom Strip -->
+                <div class="flex items-center justify-between pt-2 border-t border-slate-50">
+                    <div>
+                        <span class="text-xs text-slate-400 line-through block">₹{{ product.p_old_price|default:"" }}</span>
+                        <span class="font-bold text-slate-900">INR {{ product.p_price }}</span>
+                    </div>
+                    
+                    <!-- Quick add action trigger -->
+                    <form action="{% url 'customer:add_to_cart' product.id %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="w-9 h-9 bg-slate-50 group-hover:bg-emerald-600 text-slate-700 group-hover:text-white rounded-xl flex items-center justify-center transition-all duration-300">
+                            <i class="bi bi-bag-plus text-sm"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+    </section>
+    {% endif %}
+
     <section class="px-8 lg:px-24">
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-0 border border-emerald-100 rounded-[3rem] overflow-hidden bg-white shadow-sm">
         <div class="p-12 text-center border-r border-b lg:border-b-0 border-emerald-50 group hover:bg-emerald-50 transition-colors">
