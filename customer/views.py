@@ -267,60 +267,16 @@ def customer_logout(request):
     return redirect('common:customer_login')
 
 def checkout(request):
-    # 1. Fetch cart items from the DATABASE, not the session
     customer_id = request.session.get('customer')
+
     customer_profile = Customer.objects.get(id=customer_id)
     cart_items = Cart.objects.filter(customer_id=customer_id)
 
-    # 2. Redirect if the database cart is empty
     if not cart_items.exists():
         messages.warning(request, "Your cart is empty.")
         return redirect('customer:view_cart')
 
-    # 3. Calculate Grand Total from the database objects
     grand_total = sum(item.total_price for item in cart_items)
-
-    if request.method == 'POST':
-        full_name = request.POST.get('full_name')
-        email = request.POST.get('email')
-        address = request.POST.get('address')
-        
-        try:
-            with transaction.atomic():
-                # Create the Order
-                new_order = Order.objects.create(
-                    customer_id=customer_id,
-                    full_name=full_name,
-                    email=email,
-                    shipping_address=address,
-                    total_amount=grand_total
-                )
-
-                # Move items from Cart Table to OrderItem Table
-                for item in cart_items:
-                    # Check stock on the actual product
-                    if item.product.p_stock < item.quantity:
-                        raise Exception(f"{item.product.p_name} is out of stock.")
-
-                    OrderItem.objects.create(
-                        order=new_order,
-                        product=item.product,
-                        quantity=item.quantity,
-                        price_at_purchase=item.product.p_price
-                    )
-                    
-                    # Deduct Inventory
-                    item.product.p_stock -= item.quantity
-                    item.product.save()
-
-                # 4. Success: CLEAR THE DATABASE CART
-                cart_items.delete() 
-                
-                return redirect('customer:order_detail', order_id=new_order.order_id)
-
-        except Exception as e:
-            messages.error(request, str(e))
-            return redirect('customer:checkout')
 
     return render(request, 'customer/checkout.html', {
         'cart_items': cart_items,
