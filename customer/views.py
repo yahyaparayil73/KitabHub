@@ -16,6 +16,8 @@ from django.conf import settings
 import time
 import os  
 import razorpay
+from decimal import Decimal
+
 
 # Replace with your ACTUAL keys from the Razorpay Dashboard
 RAZORPAY_KEY_ID = 'rzp_test_SkKtChnzWjXzue'
@@ -285,47 +287,63 @@ def checkout(request):
     })
 
 def place_order(request):
-    if request.method == 'POST':
-        customer_id = request.session.get('customer')
-        cart_items = Cart.objects.filter(customer_id=customer_id)
-        
-        if not cart_items.exists():
-            return redirect('customer:view_cart')
 
-        grand_total = sum(item.total_price for item in cart_items)
-        amount_paise = int(grand_total * 100) # Currency in INR (Paise)
+    if request.method != 'POST':
+        return redirect('customer:checkout')
 
-        try:
-            with transaction.atomic():
-                # 1. Create the Razorpay Order
-                razor_order = client.order.create({
-                    "amount": amount_paise,
-                    "currency": "INR",
-                    "payment_capture": "1"
-                })
+    customer_id = request.session.get('customer')
 
-                # 2. Create the Pending Order in your DB
-                new_order = Order.objects.create(
-                    customer_id=customer_id,
-                    full_name=request.POST.get('full_name'),
-                    email=request.POST.get('email'),
-                    shipping_address=request.POST.get('address'),
-                    total_amount=grand_total,
-                    razorpay_order_id=razor_order['id'],
-                    status='Pending'
-                )
+    cart_items = Cart.objects.filter(customer_id=customer_id)
 
-                # 3. Hand over to the Payment Gateway Page
-                return render(request, 'customer/payment.html', {
-                    'order': new_order,
-                    'razorpay_order_id': razor_order['id'],
-                    'razorpay_key': RAZORPAY_KEY_ID,
-                    'amount': amount_paise
-                })
+    if not cart_items.exists():
+        messages.warning(request, "Your cart is empty.")
+        return redirect('customer:view_cart')
 
-        except Exception as e:
-            print(f"Error initializing order: {e}")
-            return redirect('customer:checkout')
+    grand_total = sum(
+        (item.total_price for item in cart_items),
+        Decimal("0.00")
+    )
+
+    amount_paise = int(grand_total * 100)
+
+    try:
+
+        # Create Razorpay order
+        razor_order = client.order.create({
+            "amount": amount_paise,
+            "currency": "INR",
+            "payment_capture": 1
+        })
+
+        # Create our database order as PENDING
+        new_order = Order.objects.create(
+            customer_id=customer_id,
+            full_name=request.POST.get('full_name'),
+            email=request.POST.get('email'),
+            shipping_address=request.POST.get('address'),
+            total_amount=grand_total,
+            razorpay_order_id=razor_order['id'],
+            status='Pending',
+            is_paid=False
+        )
+
+        return render(request, 'customer/payment.html', {
+            'order': new_order,
+            'razorpay_order_id': razor_order['id'],
+            'razorpay_key': RAZORPAY_KEY_ID,
+            'amount': amount_paise
+        })
+
+    except Exception as e:
+
+        print(f"Error initializing payment: {e}")
+
+        messages.error(
+            request,
+            "Unable to initialize payment. Please try again."
+        )
+
+        return redirect('customer:checkout')
         
 def payment_verify(request):
     order_id = request.GET.get('order_id')
