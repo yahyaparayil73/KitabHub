@@ -209,7 +209,7 @@ def customer_changepassword(request):
 
 @auth_customer
 def customer_profile(request):
-    print('yahya')
+    print('yahya parayil')
     customer = Customer.objects.get(id=request.session['customer'])
     return render(request, 'customer/customer_profile.html', {'customer_profile': customer})
 
