@@ -6,7 +6,7 @@ class Customer(models.Model):
     c_name = models.CharField(max_length=100)
     c_email = models.EmailField(unique=True)
     c_phone = models.CharField(max_length=15, unique=True)
-    c_password = models.CharField(max_length=100)
+    c_password = models.CharField(max_length=300)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -17,7 +17,7 @@ class Seller(models.Model):
     s_email = models.EmailField(unique=True)
     s_store_name = models.CharField(max_length=150, unique=True)
     s_phone = models.CharField(max_length=15)
-    s_password = models.CharField(max_length=100)
+    s_password = models.CharField(max_length=300)
     
     # Banking details for professional settlements
     s_bank_account = models.CharField(max_length=20, null=True, blank=True)

@@ -17,6 +17,9 @@ import time
 import os  
 import razorpay
 from decimal import Decimal
+from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 
 # Replace with your ACTUAL keys from the Razorpay Dashboard
@@ -191,21 +194,34 @@ def product_details(request, pid):
     # Recommended: ensure your filename is product_details.html (with underscore)
     return render(request, 'customer/product details.html', context)
 
+
 @auth_customer
 def customer_changepassword(request):
     msg = ''
-    if request.method == "POST":
-        oldpassword = request.POST['old_password']
-        newpassword = request.POST['new_password']
-        customer = Customer.objects.get(id=request.session['customer'])
-        if customer.c_password == oldpassword:
-            customer.c_password = newpassword
-            customer.save()
-            msg = 'Password Updated'
-        else:
-            msg = 'Passwords does not match'        
 
-    return render(request, 'customer/change password.html', {'message': msg})
+    if request.method == "POST":
+        oldpassword = request.POST.get('old_password', '')
+        newpassword = request.POST.get('new_password', '')
+        customer = Customer.objects.get(id=request.session['customer'])
+
+        if not check_password(oldpassword, customer.c_password):
+            msg = 'Current password is incorrect.'
+        else:
+            try:
+                validate_password(newpassword)
+            except ValidationError as error:
+                msg = ' '.join(error.messages)
+            else:
+                customer.c_password = make_password(newpassword)
+                customer.save(update_fields=['c_password'])
+                request.session.cycle_key()
+                msg = 'Password updated successfully.'
+
+    return render(
+        request,
+        'customer/change password.html',
+        {'message': msg},
+    )
 
 @auth_customer
 def customer_profile(request):
