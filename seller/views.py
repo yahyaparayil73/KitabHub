@@ -3,6 +3,9 @@ from common.models import Seller
 from seller.decorators import auth_seller
 from seller.models import Product
 from django.http import JsonResponse
+from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 # @auth_seller
 # def add_product(request):
@@ -71,29 +74,46 @@ def add_product(request):
     return render(request, 'seller/add product.html')
 
 
-# @auth_seller
+@auth_seller
 def change_password(request):
-    if request.method == "POST":
-        exstng_pwd = request.POST.get("exisitng_password")
-        newpassword = request.POST.get("new_password")
-        confirmpassword = request.POST.get("confirm_password")
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=405)
 
-        try:
-            seller = Seller.objects.get(id=request.session["seller"])
-        except Seller.DoesNotExist:
-            return JsonResponse({"error": "Seller not found"}, status=404)
+    # Keep this spelling to match your existing HTML input.
+    old_password = request.POST.get("exisitng_password", "")
+    new_password = request.POST.get("new_password", "")
+    confirm_password = request.POST.get("confirm_password", "")
 
-        if seller.s_password == exstng_pwd:
-            if newpassword == confirmpassword:
-                seller.s_password = newpassword
-                seller.save()
-                return JsonResponse({"success": "Password updated successfully"})
-            else:
-                return JsonResponse({"error": "Passwords not match"}, status=400)
-        else:
-            return JsonResponse({"error": "The password "}, status=400)
+    try:
+        seller = Seller.objects.get(id=request.session["seller"])
+    except Seller.DoesNotExist:
+        return JsonResponse({"error": "Seller not found."}, status=404)
 
-    return JsonResponse({"error": "Invalid request"}, status=400)
+    if not check_password(old_password, seller.s_password):
+        return JsonResponse(
+            {"error": "Current password is incorrect."},
+            status=400,
+        )
+
+    if new_password != confirm_password:
+        return JsonResponse(
+            {"error": "New passwords do not match."},
+            status=400,
+        )
+
+    try:
+        validate_password(new_password)
+    except ValidationError as error:
+        return JsonResponse(
+            {"error": " ".join(error.messages)},
+            status=400,
+        )
+
+    seller.s_password = make_password(new_password)
+    seller.save(update_fields=["s_password"])
+    request.session.cycle_key()
+
+    return JsonResponse({"success": "Password updated successfully."})
 
 @auth_seller
 def seller_home(request):
