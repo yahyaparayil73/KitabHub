@@ -137,7 +137,7 @@ def seller_profile(request):
 
 # @auth_seller
 def update_stock(request):
-    print('hiiii')
+    print('hello')
     products = Product.objects.filter(
         seller=request.session['seller']).values('id', 'p_name')
     if request.method == 'POST':
