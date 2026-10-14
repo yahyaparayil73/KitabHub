@@ -1,4 +1,5 @@
 from django.urls import path
+from . import api_views
 from . import views
 app_name='customer'
 urlpatterns=[
@@ -19,5 +20,6 @@ urlpatterns=[
     path('remove-from-cart/<int:cart_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('checkout/', views.checkout, name='checkout'),
     path('place_order/', views.place_order, name='place_order'),
+    path("api/books/",api_views.book_list,name="api_book_list"),
 
 ]
