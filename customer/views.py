@@ -161,7 +161,7 @@ def product_details(request, pid):
     
     # Check if the product is already in the user's cart
     is_in_cart = False
-    print('yahyaparayil')
+    print('yahya')
     if 'customer' in request.session:
         is_in_cart = Cart.objects.filter(
             customer_id=request.session['customer'], 
