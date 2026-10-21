@@ -4,9 +4,9 @@ app_name = 'common'
 
 urlpatterns = [
     path('comadminlogin', views.admin_login, name='admin_login'),
-    path('customerlogin', views.customer_login, name='customer_login'),
+    path('', views.customer_login, name='customer_login'),
     path('customersignup', views.customer_register, name='customer_register'),
-    path('', views.project_home, name='project_home'),
+    path('project_home', views.project_home, name='project_home'),
     path('sellerlogin', views.seller_login, name='seller_login'),
     path('sellersignup', views.seller_signup, name='seller_signup'),
     path('mastercommon', views.master_common, name='master_common'),

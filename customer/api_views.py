@@ -8,6 +8,8 @@ from .serializers import BookSerializer
 @api_view(["GET"])
 def book_list(request):
 
+    print('yahya')
+
     books = Book.objects.all()
 
     serializer = BookSerializer(
