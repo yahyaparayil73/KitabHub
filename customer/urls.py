@@ -21,5 +21,6 @@ urlpatterns=[
     path('checkout/', views.checkout, name='checkout'),
     path('place_order/', views.place_order, name='place_order'),
     path("api/books/",api_views.book_list,name="api_book_list"),
+    
 
 ]

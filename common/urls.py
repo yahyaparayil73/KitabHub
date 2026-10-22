@@ -15,6 +15,8 @@ urlpatterns = [
     path('salary_generator', views.salary_generator, name='salary_generator'),
     path('to_do_list', views.to_do_list, name='to_do_list'),
 
-
-
 ]
+
+
+
+

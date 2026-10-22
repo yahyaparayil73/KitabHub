@@ -28,9 +28,6 @@ RAZORPAY_KEY_SECRET = 'AfS2aXar5hfwT3QZ7fkiXlMR'
 
 client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
-
-# client = razorpay.Client(auth=("rzp_test_SkKtChnzWjXzue", "AfS2aXar5hfwT3QZ7fkiXlMR"))
-
 @auth_customer
 def customer_home(request):
     # 1. Fetch only Best Sellers
@@ -346,6 +343,7 @@ def place_order(request):
             status='Pending',
             is_paid=False
         )
+        print(f'order placed')
 
         return render(request, 'customer/payment.html', {
             'order': new_order,
