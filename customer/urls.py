@@ -20,7 +20,9 @@ urlpatterns=[
     path('remove-from-cart/<int:cart_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('checkout/', views.checkout, name='checkout'),
     path('place_order/', views.place_order, name='place_order'),
+    path('payment-verify/', views.payment_verify, name='payment_verify'),
+    path('payment-failed/', views.payment_failed, name='payment_failed'),
     path("api/books/",api_views.book_list,name="api_book_list"),
-    
+
 
 ]
