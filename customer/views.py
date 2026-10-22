@@ -52,7 +52,7 @@ def customer_home(request):
         return redirect('customer:login')
     
     recently_viewed_ids = request.session.get('recently_viewed', [])
-    print('yahya')
+    print('yahyaparayil')
     recently_viewed_products = []
 
     if recently_viewed_ids:
