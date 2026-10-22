@@ -41,6 +41,7 @@ def customer_home(request):
     if not customer_id:
         return redirect('customer:login')
     
+    
     # 3. Secure Customer Retrieval
     try:
         customer = Customer.objects.get(id=customer_id)
@@ -51,6 +52,7 @@ def customer_home(request):
         return redirect('customer:login')
     
     recently_viewed_ids = request.session.get('recently_viewed', [])
+    print('yahya')
     recently_viewed_products = []
 
     if recently_viewed_ids:
