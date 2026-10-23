@@ -156,10 +156,23 @@ def customer_myorders(request):
     customer_id = request.session['customer']
 
     orders = Order.objects.filter(
-        customer_id=customer_id,is_paid = 1)
+        customer_id=customer_id,
+        is_paid=True
+    ).order_by('-created_at')
+
+    for order in orders:
+        order.purchased_items = order.items.all()
+        order.total_quantity = 0
+        order.books_subtotal = Decimal('0.00')
+
+        for item in order.purchased_items:
+            item.line_total = item.price_at_purchase * item.quantity
+
+            order.total_quantity += item.quantity
+            order.books_subtotal += item.line_total
 
     return render(request, 'customer/my orders.html', {
-        'orders': orders,
+        'orders': orders
     })
 
 @auth_customer
