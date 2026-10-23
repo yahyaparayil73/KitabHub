@@ -362,7 +362,8 @@ def place_order(request):
         )
 
         return redirect('customer:checkout')
-        
+    
+#5180 2872 0009 1001 -  razor pay dummy card        
 def payment_verify(request):
     order_id = request.GET.get('order_id')
     payment_id = request.GET.get('payment_id')
@@ -406,3 +407,10 @@ def payment_verify(request):
         return render(request, 'customer/payment_failed.html')
 
 
+def payment_failed(request):
+    messages.error(
+        request,
+        "Payment was not completed. Please check your order status "
+        "before trying again and again."
+    )
+    return redirect('customer:myorders')
