@@ -124,9 +124,9 @@
                                         bg-slate-50 rounded-[1.5rem]
                                         overflow-hidden shrink-0 shadow-md">
 
-                                {% if item.product and item.product.image %}
+                                {% if item.product and item.product.p_image %}
                                 <img
-                                    src="{{ item.product.image.url }}"
+                                    src="{{ item.product.p_image.url }}"
                                     alt="Book cover"
                                     class="w-full h-full object-cover"
                                     loading="lazy"
@@ -145,18 +145,18 @@
 
                                 <h4 class="serif-title text-xl
                                            text-slate-900 mb-1 break-words">
-                                    {% if item.product %}
-                                        {{ item.product }}
+                                    {% if item.product.p_name %}
+                                        {{ item.product.p_name }}
                                     {% else %}
                                         Book no longer available
                                     {% endif %}
                                 </h4>
 
-                                {% if item.product.author %}
+                                {% if item.product.p_author %}
                                 <p class="text-[11px] font-bold
                                           text-slate-400 uppercase
                                           tracking-widest">
-                                    {{ item.product.author }}
+                                    {{ item.product.p_author }}
                                 </p>
                                 {% endif %}
 
@@ -177,7 +177,7 @@
                                 </div>
 
                                 <p class="text-xs text-slate-500 mt-3">
-                                    Line total
+                                    Total Price :  
                                     <span class="font-bold text-slate-900">
                                         ₹{{ item.line_total|floatformat:2 }}
                                     </span>
