@@ -1,8 +1,10 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
+
 from common.models import Customer
 from seller.models import Product
 from customer.models import Cart,Order,OrderItem
+
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import logout
 from django.db import transaction
@@ -151,7 +153,14 @@ def remove_from_cart(request, cart_id):
 
 @auth_customer
 def customer_myorders(request):
-    return render(request, 'customer/my orders.html')
+    customer_id = request.session['customer']
+
+    orders = Order.objects.filter(
+        customer_id=customer_id,is_paid = 1)
+
+    return render(request, 'customer/my orders.html', {
+        'orders': orders,
+    })
 
 @auth_customer
 def product_details(request, pid):

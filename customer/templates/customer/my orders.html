@@ -1,184 +1,172 @@
-{% extends 'customer/master_customer.html' %}
-{% load static %}
+    {% extends 'customer/master_customer.html' %}
+    {% load static %}
 
-{% block title %}
-<title>Order Archive | #SB-99201</title>
-{% endblock %}
+    {% block title %}
+    <title>Order Details | #{{ order_reference }}</title>
+    {% endblock %}
 
-{% block content %}
-<style>
-    .detail-card {
-        background: #ffffff;
-        border-radius: 3rem;
-        border: 1px solid rgba(6, 95, 70, 0.05);
-        box-shadow: 0 30px 60px -15px rgba(6, 78, 59, 0.05);
-    }
-    .status-line { position: relative; }
-    .status-line::before {
-        content: '';
-        position: absolute;
-        left: 5px;
-        top: 24px;
-        width: 2px;
-        height: 80%;
-        background: #f1f5f9;
-        z-index: 0;
-    }
-    .status-dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        position: relative;
-        z-index: 10;
-        background: #e2e8f0;
-    }
-    .status-dot.active {
-        background: #10b981;
-        box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.15);
-    }
-</style>
+    {% block content %}
+    <style>
+        .detail-card {
+            background: #ffffff;
+            border-radius: 3rem;
+            border: 1px solid rgba(6, 95, 70, 0.05);
+            box-shadow: 0 30px 60px -15px rgba(6, 78, 59, 0.05);
+        }
+        .detail-card.destination-card { background: #064e3b; }
+        .status-line { position: relative; }
+        .status-line::before {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 24px;
+            width: 2px;
+            bottom: 10px;
+            background: #f1f5f9;
+            z-index: 0;
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            position: relative;
+            z-index: 10;
+            background: #e2e8f0;
+        }
+        .status-dot.active {
+            background: #10b981;
+            box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.15);
+        }
+    </style>
 
-<div class="max-w-7xl mx-auto px-8 py-16">
-    <nav class="flex items-center gap-6 mb-12">
-        <a href="{% url 'customer:myorders' %}" class="w-12 h-12 rounded-2xl border border-slate-100 flex items-center justify-center text-slate-400 hover:text-emerald-600 hover:border-emerald-100 transition-all bg-white shadow-sm">
-            <i class="bi bi-arrow-left"></i>
-        </a>
-        <div>
-            <p class="text-[9px] font-bold uppercase tracking-[4px] text-emerald-500 mb-1">Customer Archive</p>
-            <h1 class="serif-title text-3xl text-slate-900">Order #{{ order_id|default:"SB-99201" }}</h1>
-        </div>
-    </nav>
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 py-10 sm:py-16">
+        <nav class="flex items-center gap-6 mb-12">
+            <a href="{% url 'customer:myorders' %}" class="w-12 h-12 rounded-2xl border border-slate-100 flex items-center justify-center text-slate-400 hover:text-emerald-600 hover:border-emerald-100 transition-all bg-white shadow-sm">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <p class="text-[9px] font-bold uppercase tracking-[4px] text-emerald-500 mb-1">Order Details</p>
+                <h1 class="serif-title text-2xl sm:text-3xl text-slate-900 break-all">Order #{{ orders.id }}</h1>
+                {% if ordered_at %}<p class="text-xs text-slate-400 mt-2">Placed {{ ordered_at|date:"d M Y, h:i A" }}</p>{% endif %}
+            </div>
+        </nav>
 
-    <div class="grid grid-cols-12 gap-10">
-        
-        <div class="col-span-12 lg:col-span-8 space-y-10">
+        <div class="grid grid-cols-12 gap-10">
             
-            <div class="detail-card p-10 lg:p-14">
-                <div class="flex justify-between items-center mb-10">
-                    <h2 class="text-[10px] font-bold uppercase tracking-[5px] text-slate-400">Shipment Manifest</h2>
-                    <span class="px-4 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-[9px] font-bold uppercase tracking-widest">2 Volumes</span>
-                </div>
+            <div class="col-span-12 lg:col-span-8 space-y-10">
                 
-                <div class="space-y-10">
-                    <div class="flex gap-8 items-center group">
-                        <div class="w-24 h-32 bg-slate-50 rounded-[1.5rem] overflow-hidden shrink-0 shadow-md group-hover:scale-105 transition-transform duration-500">
-                            <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=400" class="w-full h-full object-cover">
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="serif-title text-xl text-slate-900 mb-1">The Solace of Soil</h3>
-                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Archival Hardcover • Elena Vance</p>
-                            <div class="flex items-center gap-6 mt-4">
-                                <span class="text-sm font-bold text-[#064e3b]">$38.00</span>
-                                <span class="text-[9px] px-3 py-1 bg-slate-50 rounded-lg text-slate-500 font-extrabold border border-slate-100 uppercase">Quantity: 01</span>
+                <div class="detail-card p-6 sm:p-10 lg:p-14">
+                    <div class="flex justify-between items-center mb-10">
+                        <h2 class="text-[10px] font-bold uppercase tracking-[5px] text-slate-400">Your Books</h2>
+                        {% if order_items %}<span class="px-4 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-[9px] font-bold uppercase tracking-widest">{{ total_quantity }} Book{{ total_quantity|pluralize }}</span>{% endif %}
+                    </div>
+                    
+                    <div class="space-y-10">
+                        {% for item in orders %}
+                        <div class="flex gap-4 sm:gap-8 items-start sm:items-center group">
+                            <div class="w-20 h-28 sm:w-24 sm:h-32 bg-slate-50 rounded-[1.5rem] overflow-hidden shrink-0 shadow-md group-hover:scale-105 transition-transform duration-500">
+                                {% if item.image_url %}
+                                <img src="{{ item.image_url }}" alt="Cover of {{ item.title }}" class="w-full h-full object-cover" loading="lazy">
+                                {% else %}
+                                <div class="w-full h-full flex items-center justify-center text-emerald-200" role="img" aria-label="Book cover unavailable"><i class="bi bi-book text-3xl" aria-hidden="true"></i></div>
+                                {% endif %}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="serif-title text-xl text-slate-900 mb-1 break-words">{{ item.title }}</h3>
+                                {% if item.author %}<p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{{ item.product.author }}</p>{% endif %}
+                                <div class="flex flex-wrap items-center gap-3 sm:gap-6 mt-4">
+                                    <span class="text-sm font-bold text-[#064e3b]">₹{{ item.unit_price | floatformat:2 }}</span>
+                                    <span class="text-[9px] px-3 py-1 bg-slate-50 rounded-lg text-slate-500 font-extrabold border border-slate-100 uppercase">Quantity: {{ item.quantity }}</span>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-3">Line total <span class="font-bold text-slate-900">₹{{ item.total_amount |floatformat:2 }}</span></p>
                             </div>
                         </div>
-                        <button class="w-12 h-12 rounded-2xl border border-slate-100 flex items-center justify-center text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 transition-all">
-                            <i class="bi bi-arrow-clockwise"></i>
-                        </button>
-                    </div>
-
-                    <div class="h-[1px] bg-slate-50"></div>
-
-                    <div class="flex gap-8 items-center group">
-                        <div class="w-24 h-32 bg-slate-50 rounded-[1.5rem] overflow-hidden shrink-0 shadow-md group-hover:scale-105 transition-transform duration-500">
-                            <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400" class="w-full h-full object-cover">
+                        {% if not forloop.last %}<div class="h-[1px] bg-slate-50"></div>{% endif %}
+                        {% empty %}
+                        <div class="py-6 text-center">
+                            <i class="bi bi-book text-3xl text-emerald-200" aria-hidden="true"></i>
+                            <p class="text-sm text-slate-500 mt-4">Book details are unavailable for this order.</p>
                         </div>
-                        <div class="flex-1">
-                            <h3 class="serif-title text-xl text-slate-900 mb-1">Wilderness Whispers</h3>
-                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Sustainable Softcover • Marcus Thorne</p>
-                            <div class="flex items-center gap-6 mt-4">
-                                <span class="text-sm font-bold text-[#064e3b]">$24.50</span>
-                                <span class="text-[9px] px-3 py-1 bg-slate-50 rounded-lg text-slate-500 font-extrabold border border-slate-100 uppercase">Quantity: 01</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="detail-card p-6 sm:p-10 lg:p-14">
+                    <h2 class="text-[10px] font-bold uppercase tracking-[5px] text-slate-400 mb-10">Order Progress</h2>
+                    <div class="space-y-10 ml-2 status-line">
+                        <div class="flex gap-6 sm:gap-8">
+                            <div class="status-dot active shrink-0 mt-1"></div>
+                            <div>
+                                <p class="text-xs text-slate-400 mt-2">Current order status</p>
                             </div>
                         </div>
-                        <button class="w-12 h-12 rounded-2xl border border-slate-100 flex items-center justify-center text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 transition-all">
-                            <i class="bi bi-arrow-clockwise"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="detail-card p-10 lg:p-14">
-                <h2 class="text-[10px] font-bold uppercase tracking-[5px] text-slate-400 mb-10">Journey Logistics</h2>
-                <div class="space-y-12 ml-2 status-line">
-                    <div class="flex gap-8">
-                        <div class="status-dot active"></div>
-                        <div>
-                            <p class="text-sm font-bold text-slate-900">Out for Delivery</p>
-                            <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Today, 10:45 AM • Kensington Eco-Hub</p>
+                        <div class="flex gap-6 sm:gap-8">
+                            <div class="status-dot shrink-0 mt-1"></div>
+                            <div>
+                                <p class="text-xs text-slate-400 mt-2">{% if order.is_paid %}Your payment is recorded against this order.{% else %}Check your payment status before trying again.{% endif %}</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex gap-8">
-                        <div class="status-dot"></div>
-                        <div>
-                            <p class="text-sm font-bold text-slate-500">In Transit</p>
-                            <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Feb 11, 2026 • Bristol Sorting Facility</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-8">
-                        <div class="status-dot"></div>
-                        <div>
-                            <p class="text-sm font-bold text-slate-500">Archive Prepared</p>
-                            <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Feb 09, 2026 • KitabHub Warehouse</p>
+                        <div class="flex gap-6 sm:gap-8">
+                            <div class="status-dot shrink-0 mt-1"></div>
+                            <div>
+                                <p class="text-sm font-bold text-slate-700">Order created</p>
+                                {% if ordered_at %}<p class="text-xs text-slate-400 mt-2">{{ ordered_at|date:"d M Y, h:i A" }}</p>{% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-span-12 lg:col-span-4 space-y-10">
-            
-            <div class="detail-card p-10 bg-[#064e3b] text-white overflow-hidden relative">
-                <div class="relative z-10">
-                    <h2 class="text-[9px] font-bold uppercase tracking-[4px] text-emerald-400 mb-8">Destination</h2>
-                    <p class="serif-title text-xl mb-4">{{ request.session.customer_name|default:"Jameson Wright" }}</p>
-                    <p class="text-sm font-light leading-relaxed text-emerald-100/70">
-                        42 Botanical Gardens, Suite 4<br>
-                        Kensington, London<br>
-                        W8 4AG, United Kingdom
-                    </p>
-                    <div class="mt-10 pt-10 border-t border-white/10">
-                        <p class="text-[9px] font-bold uppercase tracking-[4px] text-emerald-400 mb-3">Courier Logistics</p>
-                        <p class="text-xs font-medium">Electric Van • Carbon Neutral Priority</p>
+            <div class="col-span-12 lg:col-span-4 space-y-10">
+                
+                <div class="detail-card destination-card p-6 sm:p-10 bg-[#064e3b] text-white overflow-hidden relative">
+                    <div class="relative z-10">
+                        <h2 class="text-[9px] font-bold uppercase tracking-[4px] text-emerald-400 mb-8">Destination</h2>
+                        <p class="serif-title text-xl mb-4">{{ order.full_name|default:"Recipient unavailable" }}</p>
+                        <div class="text-sm font-light leading-relaxed text-emerald-100/70 break-words">
+                            {{ order.shipping_address|default:"Address unavailable"|linebreaksbr }}
+                        </div>
+                        {% if order.email %}
+                        <div class="mt-10 pt-8 border-t border-white/10">
+                            <p class="text-[9px] font-bold uppercase tracking-[4px] text-emerald-400 mb-3">Contact Email</p>
+                            <p class="text-xs font-medium break-all">{{ order.email }}</p>
+                        </div>
+                        {% endif %}
                     </div>
+                    <i class="bi bi-leaf-fill absolute -bottom-10 -right-10 text-white/5 text-[180px] rotate-12"></i>
                 </div>
-                <i class="bi bi-leaf-fill absolute -bottom-10 -right-10 text-white/5 text-[180px] rotate-12"></i>
-            </div>
 
-            <div class="detail-card p-10 border-2 border-dashed border-emerald-100 bg-emerald-50/30">
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-200">
-                        <i class="bi bi-shield-check text-xl"></i>
+                <div class="detail-card p-6 sm:p-10 border-2 border-dashed border-emerald-100 bg-emerald-50/30">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-200 shrink-0">
+                            <i class="bi bi-receipt text-xl" aria-hidden="true"></i>
+                        </div>
+                        <h2 class="text-[10px] font-bold uppercase tracking-[4px] text-emerald-800">Payment Details</h2>
                     </div>
-                    <h2 class="text-[10px] font-bold uppercase tracking-[4px] text-emerald-800">Eco-Guarantee</h2>
+                    <p class="text-sm font-bold {% if order.is_paid %}text-emerald-700{% else %}text-slate-700{% endif %}">{% if order.is_paid %}Paid{% else %}Not confirmed{% endif %}</p>
+                    {% if payment_reference %}
+                    <p class="text-[9px] font-bold uppercase tracking-widest text-slate-400 mt-6 mb-2">Payment Reference</p>
+                    <p class="text-xs text-emerald-900/70 break-all">{{ payment_reference }}</p>
+                    {% endif %}
                 </div>
-                <p class="text-xs leading-relaxed text-emerald-900/60 mb-8">
-                    This order has contributed to the planting of <span class="text-emerald-700 font-bold underline">2 Mangrove trees</span> in West Bengal. Your contribution is verified by the Global Reforestation Alliance.
-                </p>
-                <button class="w-full py-4 border border-emerald-200 rounded-2xl text-[9px] font-bold uppercase tracking-widest text-emerald-700 hover:bg-emerald-50 transition-all">
-                    Download Impact Certificate
-                </button>
-            </div>
 
-            <div class="detail-card p-10">
-                <h2 class="text-[10px] font-bold uppercase tracking-[5px] text-slate-400 mb-8">Financial Summary</h2>
-                <div class="space-y-4">
-                    <div class="flex justify-between text-xs font-medium">
-                        <span class="text-slate-400">Subtotal</span>
-                        <span class="text-slate-900">$62.50</span>
-                    </div>
-                    <div class="flex justify-between text-xs font-medium">
-                        <span class="text-slate-400">Eco-Shipping</span>
-                        <span class="text-emerald-500">Free</span>
-                    </div>
-                    <div class="h-[1px] bg-slate-50 my-2"></div>
-                    <div class="flex justify-between items-center">
-                        <span class="serif-title text-xl text-slate-900">Total</span>
-                        <span class="text-2xl font-bold text-[#064e3b]">$62.50</span>
+                <div class="detail-card p-6 sm:p-10">
+                    <h2 class="text-[10px] font-bold uppercase tracking-[5px] text-slate-400 mb-8">Financial Summary</h2>
+                    <div class="space-y-4">
+                        {% if order_items %}
+                        <div class="flex justify-between text-xs font-medium gap-4">
+                            <span class="text-slate-400">Books subtotal</span>
+                            <span class="text-slate-900">₹{{ items_subtotal|floatformat:2 }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="h-[1px] bg-slate-50 my-2"></div>
+                        <div class="flex justify-between items-center">
+                            <span class="serif-title text-xl text-slate-900">Order Total</span>
+                            <span class="text-2xl font-bold text-[#064e3b]">₹{{ order.total_amount|floatformat:2 }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-{% endblock %}
+    {% endblock %}
