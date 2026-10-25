@@ -1,0 +1,164 @@
+{% extends 'customer/master_customer.html' %}
+{% block title %}<title>Order Confirmed | {{ order.order_id }} | KitabHub</title>{% endblock %}
+{% block content %}
+<style>
+.kc-page { --kc-green:#064e3b; --kc-muted:#64748b; max-width:1050px; margin:auto; padding:24px 20px 36px; color:#19382b; }
+.kc-page * { box-sizing:border-box; }
+.kc-page .kc-receipt { background:#fff; border:1px solid #dfe9e3; border-radius:20px; overflow:hidden; }
+.kc-page .kc-success { display:flex; align-items:center; gap:17px; padding:23px 25px; background:#f0f7f3; border-bottom:1px solid #dfebe3; }
+.kc-page .kc-check { width:60px; height:60px; flex-shrink:0; border-radius:50%; background:#e0f0e7; color:#047857; }
+.kc-page .kc-check svg { display:block; width:100%; height:100%; overflow:visible; }
+.kc-page .kc-ring { stroke-dasharray:100; animation:kc-ring-draw .6s ease-out both; transform-origin:center; transform:rotate(-90deg); }
+.kc-page .kc-tick { stroke-dasharray:100; animation:kc-tick-draw .4s .45s ease-out both; }
+.kc-page .kc-check { animation:kc-check-settle .45s .65s ease-out both; }
+@keyframes kc-ring-draw { from { stroke-dashoffset:100; } to { stroke-dashoffset:0; } }
+@keyframes kc-tick-draw { from { stroke-dashoffset:100; } to { stroke-dashoffset:0; } }
+@keyframes kc-check-settle { 0%,100% { transform:scale(1); } 50% { transform:scale(1.06); } }
+.kc-page .kc-eyebrow { margin:0 0 5px; font-size:10px; letter-spacing:1.8px; font-weight:700; text-transform:uppercase; color:#047857; }
+.kc-page h1 { margin:0; font-size:clamp(25px,3.2vw,34px); line-height:1.15; letter-spacing:-.3px; }
+.kc-page .kc-subtitle { margin:7px 0 0; color:#52695b; font-size:12px; line-height:1.6; }
+.kc-page .kc-meta { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:9px 18px; padding:12px 24px; border-bottom:1px solid #edf2ee; }
+.kc-page .kc-order-ref { display:flex; align-items:center; flex-wrap:wrap; gap:6px 9px; min-width:0; font-size:12px; }
+.kc-page .kc-order-ref strong { color:var(--kc-green); overflow-wrap:anywhere; }
+.kc-page .kc-date { font-size:11px; color:var(--kc-muted); }
+.kc-page .kc-copy { background:white; border:1px solid #dfe9e3; border-radius:7px; padding:5px 8px; color:#047857; font:inherit; font-size:10px; cursor:pointer; }
+.kc-page .kc-copy[hidden] { display:none; }
+.kc-page .kc-copy:hover { background:#f0f7f3; }
+.kc-page .kc-copy-feedback { font-size:10px; color:#047857; }
+.kc-page .kc-body { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:24px; padding:20px 24px; }
+.kc-page .kc-label { margin:0 0 12px; color:var(--kc-muted); font-size:10px; letter-spacing:1px; font-weight:600; text-transform:uppercase; }
+.kc-page .kc-books { min-width:0; }
+.kc-page .kc-books-heading { display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+.kc-page .kc-count { color:var(--kc-muted); font-size:11px; }
+.kc-page .kc-book { display:flex; align-items:center; gap:12px; padding:10px 0; }
+.kc-page .kc-book + .kc-book { border-top:1px solid #f1f5f3; }
+.kc-page .kc-cover { width:38px; height:54px; border-radius:6px; flex-shrink:0; overflow:hidden; background:#f0f5f2; color:#76a38c; display:grid; place-items:center; }
+.kc-page .kc-cover img { display:block; width:100%; height:100%; object-fit:cover; }
+.kc-page .kc-cover svg { width:21px; height:21px; }
+.kc-page .kc-book-copy { flex:1; min-width:0; }
+.kc-page .kc-book-copy h3 { margin:0 0 3px; font-size:17px; line-height:1.3; overflow-wrap:anywhere; }
+.kc-page .kc-author { margin:0 0 4px; font-size:11px; color:var(--kc-muted); overflow-wrap:anywhere; }
+.kc-page .kc-quantity { margin:0; font-size:11px; line-height:1.5; color:var(--kc-muted); }
+.kc-page .kc-line-total { font-size:12px; font-weight:700; color:var(--kc-green); margin:0; text-align:right; flex-shrink:0; }
+.kc-page .kc-delivery { border-left:1px solid #edf2ee; padding-left:24px; min-width:0; }
+.kc-page .kc-recipient { font-size:16px; margin:0 0 6px; color:var(--kc-green); overflow-wrap:anywhere; }
+.kc-page .kc-address { font-size:12px; line-height:1.65; color:#52645b; overflow-wrap:anywhere; }
+.kc-page .kc-email { font-size:11px; color:var(--kc-muted); line-height:1.5; overflow-wrap:anywhere; margin:8px 0 0; }
+.kc-page .kc-status { font-size:11px; color:#047857; margin:12px 0 0; line-height:1.5; }
+.kc-page .kc-finance { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px 22px; padding:15px 24px; border-top:1px solid #edf2ee; background:#fbfcfb; }
+.kc-page .kc-paid { font-size:11px; color:#047857; font-weight:600; margin:0 0 5px; }
+.kc-page .kc-payment-id { font-size:11px; color:var(--kc-muted); margin:0; overflow-wrap:anywhere; }
+.kc-page .kc-finance-info { min-width:0; }
+.kc-page .kc-totals { margin:0; min-width:210px; }
+.kc-page .kc-money-row { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:6px 18px; font-size:11px; color:var(--kc-muted); }
+.kc-page .kc-money-row dd { margin:0; }
+.kc-page .kc-total { margin-top:6px; color:#234635; }
+.kc-page .kc-total dd { font-size:23px; font-weight:700; color:var(--kc-green); }
+.kc-page .kc-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+.kc-page .kc-button { display:inline-flex; justify-content:center; align-items:center; gap:10px; min-height:43px; padding:11px 19px; border:1px solid var(--kc-green); border-radius:11px; background:var(--kc-green); color:white; font-size:12px; font-weight:600; text-decoration:none; }
+.kc-page .kc-button:hover { background:#065f46; }
+.kc-page .kc-secondary { background:white; border-color:#dfe9e3; color:var(--kc-green); }
+.kc-page .kc-secondary:hover { background:#f0f7f3; }
+.kc-page .kc-note { font-size:11px; line-height:1.6; color:var(--kc-muted); margin:12px 0 0; }
+.kc-page a:focus-visible,.kc-page button:focus-visible { outline:2px solid #059669; outline-offset:4px; }
+.kc-page .kc-empty { font-size:12px; color:var(--kc-muted); line-height:1.6; }
+@media (max-width:640px) {
+    .kc-page { padding:18px 12px 28px; }
+    .kc-page .kc-success { padding:20px 16px; gap:12px; align-items:flex-start; }
+    .kc-page .kc-check { width:46px; height:46px; }
+    .kc-page .kc-meta { padding:12px 16px; }
+    .kc-page .kc-body { grid-template-columns:minmax(0,1fr); padding:16px; gap:16px; }
+    .kc-page .kc-delivery { border-left:0; padding:16px 0 0; border-top:1px solid #edf2ee; }
+    .kc-page .kc-finance { padding:14px 16px; }
+    .kc-page .kc-totals { width:100%; min-width:0; }
+    .kc-page .kc-actions .kc-button { flex:1 1 170px; }
+    .kc-page .kc-line-total { max-width:88px; overflow-wrap:anywhere; }
+}
+@media (prefers-reduced-motion:reduce) {
+    .kc-page .kc-check,.kc-page .kc-ring,.kc-page .kc-tick { animation:none; transform:none; stroke-dashoffset:0; }
+}
+</style>
+
+<div class="kc-page">
+    <article class="kc-receipt" aria-labelledby="kc-success-title">
+        <header class="kc-success">
+            <div class="kc-check" aria-hidden="true">
+                <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <circle class="kc-ring" cx="32" cy="32" r="27" stroke-width="2" pathLength="100"/>
+                    <path class="kc-tick" d="m20 32 8 8 17-18" stroke-width="3.5" pathLength="100"/>
+                </svg>
+            </div>
+            <div>
+                <p class="kc-eyebrow">Payment received</p>
+                <h1 class="serif-title" id="kc-success-title">Your order is placed.</h1>
+                <p class="kc-subtitle">Thank you for shopping with KitabHub. You can follow packing and shipping updates in My Orders.</p>
+            </div>
+        </header>
+
+        <div class="kc-meta">
+            <div class="kc-order-ref">Order <strong id="kc-order-reference">{{ order.order_id }}</strong><button class="kc-copy" id="kc-copy-order" type="button" hidden aria-label="Copy order number">Copy</button><span class="kc-copy-feedback" id="kc-copy-feedback" role="status" aria-live="polite"></span></div>
+            {% if order.created_at %}<span class="kc-date">Placed {{ order.created_at|date:"d M Y, h:i A" }}</span>{% endif %}
+        </div>
+
+        <div class="kc-body">
+            <section class="kc-books" aria-labelledby="kc-books-title">
+                <div class="kc-books-heading"><h2 class="kc-label" id="kc-books-title">Your books</h2>{% if order_items %}<span class="kc-count">{{ total_quantity }} book{{ total_quantity|pluralize }}</span>{% endif %}</div>
+                {% for item in order_items %}
+                <div class="kc-book">
+                    <div class="kc-cover">
+                        {% if item.product and item.product.p_image %}<img src="{{ item.product.p_image.url }}" alt="Cover of {{ item.product.p_name }}" loading="lazy">
+                        {% else %}<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5C8 3 5 3 2 4v15c3-1 6-1 10 1 4-2 7-2 10-1V4c-3-1-6-1-10 1Zm0 0v15"/></svg>{% endif %}
+                    </div>
+                    <div class="kc-book-copy">
+                        <h3 class="serif-title">{% if item.product.p_name %}{{ item.product.p_name }}{% else %}Book details unavailable{% endif %}</h3>
+                        {% if item.product.p_author %}<p class="kc-author">{{ item.product.p_author }}</p>{% endif %}
+                        <p class="kc-quantity">Qty {{ item.quantity }} &middot; ₹{{ item.price_at_purchase|floatformat:2 }} each</p>
+                    </div>
+                    <p class="kc-line-total">₹{{ item.line_total|floatformat:2 }}</p>
+                </div>
+                {% empty %}<p class="kc-empty">Book details are currently unavailable. Keep your order reference for any queries.</p>{% endfor %}
+            </section>
+
+            <section class="kc-delivery" aria-labelledby="kc-delivery-title">
+                <h2 class="kc-label" id="kc-delivery-title">Delivering to</h2>
+                <p class="kc-recipient serif-title">{{ order.full_name }}</p>
+                <div class="kc-address">{{ order.shipping_address|linebreaksbr }}</div>
+                {% if order.email %}<p class="kc-email">{{ order.email }}</p>{% endif %}
+                <p class="kc-status">Order status: {% if order.status == 'Pending' %}Awaiting packing{% else %}{{ order.get_status_display }}{% endif %}</p>
+            </section>
+        </div>
+
+        <div class="kc-finance">
+            <div class="kc-finance-info"><p class="kc-paid">Paid through Razorpay</p>{% if order.razorpay_payment_id %}<p class="kc-payment-id">Payment ref: {{ order.razorpay_payment_id }}</p>{% endif %}</div>
+            <dl class="kc-totals">
+                {% if order_items %}<div class="kc-money-row"><dt>Books subtotal</dt><dd>₹{{ books_subtotal|floatformat:2 }}</dd></div>{% endif %}
+                <div class="kc-money-row kc-total"><dt>Total paid</dt><dd>₹{{ order.total_amount|floatformat:2 }}</dd></div>
+            </dl>
+        </div>
+    </article>
+
+    <nav class="kc-actions" aria-label="After your purchase">
+        <a class="kc-button" href="{% url 'customer:myorders' %}">View My Orders <span aria-hidden="true">&rarr;</span></a>
+        <a class="kc-button kc-secondary" href="{% url 'customer:home' %}">Continue Shopping</a>
+    </nav>
+    <p class="kc-note">Packing and shipping updates will appear in My Orders. Keep your order number for your records.</p>
+</div>
+<script>
+(() => {
+    const button = document.getElementById('kc-copy-order');
+    const reference = document.getElementById('kc-order-reference');
+    const feedback = document.getElementById('kc-copy-feedback');
+    if (!button || !reference || !feedback || !navigator.clipboard || !window.isSecureContext) return;
+    button.hidden = false;
+    button.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(reference.textContent.trim());
+            feedback.textContent = 'Order number copied';
+            button.textContent = 'Copied';
+        } catch {
+            feedback.textContent = 'Select the order number to copy it manually.';
+        }
+    });
+})();
+</script>
+{% endblock %}
