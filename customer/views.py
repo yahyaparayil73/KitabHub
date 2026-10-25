@@ -424,7 +424,7 @@ def payment_verify(request):
             cart_items.delete()
             print('test')
 
-        return redirect('customer:myorders')
+        return redirect('customer:order_success')
 
     except Exception:
         return render(request, 'customer/payment_failed.html')
@@ -438,10 +438,29 @@ def payment_failed(request):
     )
     return redirect('customer:myorders')
 
-def order_success(request):
-    messages.error(
-        request,
-        "Payment was not completed. Please check your order status "
-        "before trying again and again."
+@auth_customer
+def order_success(request, order_id):
+    customer_id = request.session['customer']
+
+    order = get_object_or_404(
+        Order,
+        order_id=order_id,
+        customer_id=customer_id,
+        is_paid=True,
     )
-    return render(request, 'customer/order_success.html')
+
+    order_items = order.items.all()
+    total_quantity = 0
+    books_subtotal = Decimal('0.00')
+
+    for item in order_items:
+        item.line_total = item.price_at_purchase * item.quantity
+        total_quantity += item.quantity
+        books_subtotal += item.line_total
+
+    return render(request, 'customer/order_success.html', {
+        'order': order,
+        'order_items': order_items,
+        'total_quantity': total_quantity,
+        'books_subtotal': books_subtotal,
+    })
