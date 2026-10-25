@@ -6,351 +6,213 @@
 
 {% block content %}
 <style>
-    .detail-card {
+    .order-card {
         background: #ffffff;
-        border-radius: 3rem;
-        border: 1px solid rgba(6, 95, 70, 0.05);
-        box-shadow: 0 30px 60px -15px rgba(6, 78, 59, 0.05);
+        border-radius: 2rem;
+        border: 1px solid rgba(6, 95, 70, 0.08);
+        box-shadow: 0 20px 40px -15px rgba(6, 78, 59, 0.04);
     }
 
-    .detail-card.destination-card {
+    .destination-box {
         background: #064e3b;
     }
 
     .status-dot {
-        width: 12px;
-        height: 12px;
+        width: 10px;
+        height: 10px;
         border-radius: 50%;
         background: #10b981;
-        box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.15);
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
         flex-shrink: 0;
     }
 </style>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-8 py-10 sm:py-16">
+<div class="max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-12">
 
     <!-- Page heading -->
-    <header class="mb-12">
-        <p class="text-[9px] font-bold uppercase tracking-[4px]
-                  text-emerald-500 mb-2">
+    <header class="mb-8">
+        <p class="text-[9px] font-bold uppercase tracking-[4px] text-emerald-500 mb-1">
             Customer Archive
         </p>
-
-        <h1 class="serif-title text-4xl text-slate-900">
+        <h1 class="serif-title text-3xl sm:text-4xl text-slate-900">
             My Orders
         </h1>
-
-        <p class="text-sm text-slate-400 mt-3">
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">
             Your paid orders and delivery details.
         </p>
     </header>
 
     {% for message in messages %}
-    <div role="status"
-         class="mb-6 p-5 rounded-2xl bg-white border
-                border-slate-100 text-sm text-slate-700">
+    <div role="status" class="mb-6 p-4 rounded-xl bg-white border border-slate-100 text-xs sm:text-sm text-slate-700 shadow-sm">
         {{ message }}
     </div>
     {% endfor %}
 
     {% for order in orders %}
+    
+    <!-- Unified Compact Order Card -->
+    <article class="order-card p-6 sm:p-8 mb-10">
 
-    <article class="mb-16">
-
-        <!-- Individual order heading -->
-        <header class="flex flex-wrap justify-between
-                       items-center gap-5 mb-8">
-
+        <!-- Order Header Bar -->
+        <div class="flex flex-wrap justify-between items-center gap-4 pb-6 mb-6 border-b border-slate-100">
             <div>
-                <p class="text-[9px] font-bold uppercase
-                          tracking-[4px] text-emerald-500 mb-2">
-                    Order Details
-                </p>
-
-                <h2 class="serif-title text-2xl sm:text-3xl
-                           text-slate-900 break-all">
-                    Order #{{ order.order_id }}
-                </h2>
-
+                <div class="flex items-center gap-3">
+                    <h2 class="serif-title text-xl sm:text-2xl text-slate-900">
+                        Order #{{ order.order_id }}
+                    </h2>
+                    <span class="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[9px] font-bold uppercase tracking-widest">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
                 {% if order.created_at %}
-                <p class="text-xs text-slate-400 mt-2">
-                    Placed {{ order.created_at|date:"d M Y, h:i A" }}
+                <p class="text-xs text-slate-400 mt-1">
+                    Placed on {{ order.created_at|date:"d M Y, h:i A" }}
                 </p>
                 {% endif %}
             </div>
 
-            <span class="px-4 py-2 bg-emerald-50 text-emerald-700
-                         rounded-full text-[9px] font-bold
-                         uppercase tracking-widest">
-                {{ order.get_status_display }}
-            </span>
-        </header>
+            <div class="text-right">
+                <p class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Total Amount</p>
+                <p class="serif-title text-xl sm:text-2xl text-[#064e3b]">
+                    ₹{{ order.total_amount|floatformat:2 }}
+                </p>
+            </div>
+        </div>
 
-        <div class="grid grid-cols-12 gap-8 lg:gap-10">
+        <!-- Main Content Split Grid -->
+        <div class="grid grid-cols-12 gap-6 lg:gap-8">
 
-            <!-- Left column -->
-            <div class="col-span-12 lg:col-span-8 space-y-8">
+            <!-- LEFT COLUMN: Purchased Books & Progress (Span 8) -->
+            <div class="col-span-12 lg:col-span-8 space-y-6">
 
-                <section class="detail-card p-6 sm:p-10 lg:p-14">
-
-                    <div class="flex flex-wrap justify-between
-                                items-center gap-4 mb-10">
-
-                        <h3 class="text-[10px] font-bold uppercase
-                                   tracking-[5px] text-slate-400">
-                            Your Books
+                <!-- Books List Box -->
+                <div class="bg-slate-50/50 rounded-2xl p-4 sm:p-6 border border-slate-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-[10px] font-bold uppercase tracking-[3px] text-slate-400">
+                            Ordered Books
                         </h3>
-
                         {% if order.purchased_items %}
-                        <span class="px-4 py-1.5 bg-emerald-50
-                                     text-emerald-700 rounded-full
-                                     text-[9px] font-bold uppercase
-                                     tracking-widest">
-                            {{ order.total_quantity }}
-                            Book{{ order.total_quantity|pluralize }}
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">
+                            {{ order.total_quantity }} Book{{ order.total_quantity|pluralize }}
                         </span>
                         {% endif %}
                     </div>
 
-                    <div class="space-y-10">
-
+                    <div class="space-y-4 max-h-[350px] overflow-y-auto pr-1">
                         {% for item in order.purchased_items %}
-
-                        <div class="flex gap-4 sm:gap-8
-                                    items-start sm:items-center group">
-
-                            <!-- Product cover -->
-                            <div class="w-20 h-28 sm:w-24 sm:h-32
-                                        bg-slate-50 rounded-[1.5rem]
-                                        overflow-hidden shrink-0 shadow-md">
-
+                        <div class="flex gap-4 items-center bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                            <!-- Product Cover -->
+                            <div class="w-14 h-20 sm:w-16 sm:h-22 bg-slate-100 rounded-lg overflow-hidden shrink-0">
                                 {% if item.product and item.product.p_image %}
-                                <img
-                                    src="{{ item.product.p_image.url }}"
-                                    alt="Book cover"
-                                    class="w-full h-full object-cover"
-                                    loading="lazy"
-                                >
+                                <img src="{{ item.product.p_image.url }}" alt="Book cover" class="w-full h-full object-cover" loading="lazy">
                                 {% else %}
-                                <div class="w-full h-full flex items-center
-                                            justify-center text-emerald-200">
-                                    <i class="bi bi-book text-3xl"
-                                       aria-hidden="true"></i>
+                                <div class="w-full h-full flex items-center justify-center text-emerald-200">
+                                    <i class="bi bi-book text-xl" aria-hidden="true"></i>
                                 </div>
                                 {% endif %}
                             </div>
 
-                            <!-- Product information -->
+                            <!-- Product Info -->
                             <div class="flex-1 min-w-0">
-
-                                <h4 class="serif-title text-xl
-                                           text-slate-900 mb-1 break-words">
-                                    {% if item.product.p_name %}
-                                        {{ item.product.p_name }}
-                                    {% else %}
-                                        Book no longer available
-                                    {% endif %}
+                                <h4 class="text-sm font-bold text-slate-900 truncate">
+                                    {% if item.product.p_name %}{{ item.product.p_name }}{% else %}Book unavailable{% endif %}
                                 </h4>
-
                                 {% if item.product.p_author %}
-                                <p class="text-[11px] font-bold
-                                          text-slate-400 uppercase
-                                          tracking-widest">
+                                <p class="text-[10px] font-medium text-slate-400 uppercase tracking-wide truncate">
                                     {{ item.product.p_author }}
                                 </p>
                                 {% endif %}
-
-                                <div class="flex flex-wrap items-center
-                                            gap-3 sm:gap-6 mt-4">
-
-                                    <span class="text-sm font-bold
-                                                 text-[#064e3b]">
-                                        ₹{{ item.price_at_purchase|floatformat:2 }}
-                                    </span>
-
-                                    <span class="text-[9px] px-3 py-1
-                                                 bg-slate-50 rounded-lg
-                                                 text-slate-500 font-extrabold
-                                                 border border-slate-100 uppercase">
-                                        Quantity: {{ item.quantity }}
-                                    </span>
+                                <div class="flex items-center gap-3 mt-2 text-xs">
+                                    <span class="text-slate-500">Qty: <strong>{{ item.quantity }}</strong></span>
+                                    <span class="text-slate-300">|</span>
+                                    <span class="font-bold text-[#064e3b]">₹{{ item.line_total|floatformat:2 }}</span>
                                 </div>
-
-                                <p class="text-xs text-slate-500 mt-3">
-                                    Total Price :  
-                                    <span class="font-bold text-slate-900">
-                                        ₹{{ item.line_total|floatformat:2 }}
-                                    </span>
-                                </p>
                             </div>
                         </div>
-
-                        {% if not forloop.last %}
-                        <div class="h-px bg-slate-100"></div>
-                        {% endif %}
-
                         {% empty %}
-                        <div class="py-6 text-center">
-                            <i class="bi bi-book text-3xl text-emerald-200"
-                               aria-hidden="true"></i>
-
-                            <p class="text-sm text-slate-500 mt-4">
-                                Book details are unavailable for this order.
-                            </p>
+                        <div class="py-6 text-center text-slate-400 text-xs">
+                            No book details available for this order.
                         </div>
                         {% endfor %}
-
                     </div>
-                </section>
+                </div>
 
-                <!-- Actual database status -->
-                <section class="detail-card p-6 sm:p-10">
-                    <h3 class="text-[10px] font-bold uppercase
-                               tracking-[5px] text-slate-400 mb-8">
-                        Order Progress
-                    </h3>
-
-                    <div class="flex items-center gap-6">
+                <!-- Quick Progress Row -->
+                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
                         <div class="status-dot" aria-hidden="true"></div>
-
                         <div>
-                            <p class="text-sm font-bold text-slate-900">
-                                {{ order.get_status_display }}
-                            </p>
-
-                            <p class="text-xs text-slate-400 mt-2">
-                                Current order status
-                            </p>
+                            <p class="text-xs font-bold text-slate-900">{{ order.get_status_display }}</p>
+                            <p class="text-[11px] text-slate-400">Current fulfillment status</p>
                         </div>
                     </div>
-                </section>
+                    {% if order.is_paid %}
+                    <span class="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-3 py-1 rounded-lg uppercase tracking-wider">
+                        Payment Verified
+                    </span>
+                    {% else %}
+                    <span class="text-[10px] bg-amber-50 text-amber-700 font-bold px-3 py-1 rounded-lg uppercase tracking-wider">
+                        Payment Pending
+                    </span>
+                    {% endif %}
+                </div>
 
             </div>
 
-            <!-- Right column -->
-            <div class="col-span-12 lg:col-span-4 space-y-8">
+            <!-- RIGHT COLUMN: Destination & Summary Sidebar (Span 4) -->
+            <div class="col-span-12 lg:col-span-4 space-y-4">
 
-                <!-- Saved shipping address -->
-                <section class="detail-card destination-card
-                                p-6 sm:p-10 text-white">
-
-                    <h3 class="text-[9px] font-bold uppercase
-                               tracking-[4px] text-emerald-400 mb-8">
+                <!-- Compact Destination Box -->
+                <div class="destination-box rounded-2xl p-5 text-white shadow-md">
+                    <h3 class="text-[9px] font-bold uppercase tracking-[3px] text-emerald-400 mb-3">
                         Destination
                     </h3>
-
-                    <p class="serif-title text-xl mb-4 break-words">
+                    <p class="serif-title text-base mb-2 break-words">
                         {{ order.full_name }}
                     </p>
-
-                    <div class="text-sm font-light leading-relaxed
-                                text-emerald-100/80 break-words">
+                    <div class="text-xs font-light leading-relaxed text-emerald-100/80 break-words">
                         {{ order.shipping_address|linebreaksbr }}
                     </div>
 
                     {% if order.email %}
-                    <div class="mt-8 pt-8 border-t border-white/10">
-
-                        <p class="text-[9px] font-bold uppercase
-                                  tracking-[4px] text-emerald-400 mb-3">
-                            Contact Email
-                        </p>
-
-                        <p class="text-xs font-medium break-all">
-                            {{ order.email }}
-                        </p>
+                    <div class="mt-4 pt-4 border-t border-white/10">
+                        <p class="text-[8px] font-bold uppercase tracking-widest text-emerald-400 mb-1">Contact</p>
+                        <p class="text-[11px] font-medium break-all">{{ order.email }}</p>
                     </div>
                     {% endif %}
-                </section>
+                </div>
 
-                <!-- Payment information -->
-                <section class="detail-card p-6 sm:p-10">
-
-                    <h3 class="text-[10px] font-bold uppercase
-                               tracking-[4px] text-emerald-800 mb-6">
-                        Payment Details
-                    </h3>
-
-                    <p class="text-sm font-bold text-emerald-700">
-                        {% if order.is_paid %}
-                            Paid
-                        {% else %}
-                            Not confirmed
-                        {% endif %}
-                    </p>
+                <!-- Payment & Summary Box -->
+                <div class="bg-slate-50/50 rounded-2xl p-5 border border-slate-100 space-y-3 text-xs">
+                    <div class="flex justify-between items-center text-slate-500">
+                        <span>Subtotal</span>
+                        <span class="font-semibold text-slate-800">₹{{ order.books_subtotal|floatformat:2 }}</span>
+                    </div>
 
                     {% if order.razorpay_payment_id %}
-                    <p class="text-[9px] font-bold uppercase
-                              tracking-widest text-slate-400 mt-6 mb-2">
-                        Payment Reference
-                    </p>
-
-                    <p class="text-xs text-emerald-900/70 break-all">
-                        {{ order.razorpay_payment_id }}
-                    </p>
-                    {% endif %}
-                </section>
-
-                <!-- Financial summary -->
-                <section class="detail-card p-6 sm:p-10">
-
-                    <h3 class="text-[10px] font-bold uppercase
-                               tracking-[4px] text-slate-400 mb-8">
-                        Financial Summary
-                    </h3>
-
-                    <div class="space-y-5">
-
-                        {% if order.purchased_items %}
-                        <div class="flex justify-between gap-4
-                                    text-xs font-medium">
-                            <span class="text-slate-400">
-                                Books subtotal
-                            </span>
-
-                            <span class="text-slate-900">
-                                ₹{{ order.books_subtotal|floatformat:2 }}
-                            </span>
-                        </div>
-                        {% endif %}
-
-                        <div class="h-px bg-slate-100"></div>
-
-                        <div class="flex flex-wrap justify-between
-                                    items-center gap-3">
-                            <span class="serif-title text-xl text-slate-900">
-                                Order Total
-                            </span>
-
-                            <span class="text-2xl font-bold text-[#064e3b]">
-                                ₹{{ order.total_amount|floatformat:2 }}
-                            </span>
-                        </div>
+                    <div class="flex justify-between items-center text-[10px] text-slate-400 pt-2 border-t border-slate-200/60">
+                        <span>Ref ID</span>
+                        <span class="font-mono truncate max-w-[140px]">{{ order.razorpay_payment_id }}</span>
                     </div>
-                </section>
+                    {% endif %}
+                </div>
 
             </div>
+
         </div>
     </article>
 
     {% empty %}
-    <div class="detail-card px-6 py-16 text-center">
-
-        <i class="bi bi-bag text-4xl text-emerald-200"
-           aria-hidden="true"></i>
-
-        <h2 class="serif-title text-2xl text-slate-900 mt-6">
+    <div class="order-card px-6 py-16 text-center max-w-xl mx-auto">
+        <i class="bi bi-bag text-4xl text-emerald-200" aria-hidden="true"></i>
+        <h2 class="serif-title text-2xl text-slate-900 mt-4">
             No paid orders yet
         </h2>
-
-        <p class="text-sm text-slate-400 mt-3 mb-8">
-            Your completed purchases will appear here.
+        <p class="text-xs sm:text-sm text-slate-400 mt-2 mb-6">
+            Your completed purchases will appear here once you place an order.
         </p>
-
         <a href="{% url 'customer:home' %}"
-           class="inline-flex items-center gap-3 px-7 py-4
-                  bg-[#064e3b] text-white rounded-2xl
-                  text-xs font-bold hover:bg-emerald-800 transition-all">
+           class="inline-flex items-center gap-2 px-6 py-3 bg-[#064e3b] text-white rounded-xl text-xs font-bold hover:bg-emerald-800 transition-all">
             Explore Books
             <i class="bi bi-arrow-right" aria-hidden="true"></i>
         </a>
