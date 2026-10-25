@@ -430,17 +430,18 @@ def payment_verify(request):
         return render(request, 'customer/payment_failed.html')
 
 
-def payment_failed(request):
-    messages.error(
-        request,
-        "Payment was not completed. Please check your order status "
-        "before trying again and again."
-    )
-    return redirect('customer:myorders')
+# def payment_failed(request):
+#     messages.error(
+#         request,
+#         "Payment was not completed. Please check your order status "
+#         "before trying again and again."
+#     )
+#     return redirect('customer:myorders')
 
 @auth_customer
 def order_success(request, order_id):
     customer_id = request.session['customer']
+    print('hanna')
 
     order = get_object_or_404(
         Order,
