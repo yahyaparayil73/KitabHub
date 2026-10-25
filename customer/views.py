@@ -424,7 +424,7 @@ def payment_verify(request):
             cart_items.delete()
             print('test')
 
-        return redirect('customer:order_success')
+        return redirect('customer:order_success', order_id=order.order_id)
 
     except Exception:
         return render(request, 'customer/payment_failed.html')
