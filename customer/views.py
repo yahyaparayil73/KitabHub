@@ -422,6 +422,7 @@ def payment_verify(request):
 
             # Clear the cart
             cart_items.delete()
+            print('test')
 
         return redirect('customer:myorders', order_id=order.order_id)
 
