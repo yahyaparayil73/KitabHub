@@ -437,3 +437,11 @@ def payment_failed(request):
         "before trying again and again."
     )
     return redirect('customer:myorders')
+
+def order_success(request):
+    messages.error(
+        request,
+        "Payment was not completed. Please check your order status "
+        "before trying again and again."
+    )
+    return render(request, 'customer/order_success.html')
