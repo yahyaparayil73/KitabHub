@@ -22,11 +22,21 @@
             <div class="flex-grow space-y-6">
                 {% for item in cart_items %}
                 <div class="cart-card bg-white p-6 rounded-[2.5rem] shadow-sm border border-emerald-50 flex items-center gap-6" id="cart-item-{{ item.id }}">
-                    <a href="{% url 'customer:remove_from_cart' item.id %}" 
-                    onclick="return confirm('Are you sure you want to remove this volume from your archive?')"
-                    class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all border-none outline-none">
-                        <i class="bi bi-x-lg text-xs"></i>
-                    </a>
+                    <form method="post"
+                        action="{% url 'customer:remove_from_cart' item.id %}"
+                        onsubmit="return confirm('Remove this book from your cart?')">
+
+                        {% csrf_token %}
+
+                        <button type="submit"
+                                aria-label="Remove {{ item.product.p_name }} from cart"
+                                class="w-8 h-8 rounded-full bg-slate-50 flex items-center
+                                    justify-center text-slate-400 hover:bg-red-50
+                                    hover:text-red-500 transition-all border-none
+                                    outline-none">
+                            <i class="bi bi-x-lg text-xs" aria-hidden="true"></i>
+                        </button>
+                    </form>
                     
                     <div class="w-24 h-32 bg-slate-50 rounded-2xl overflow-hidden shadow-sm shrink-0">
                         <img src="{{ item.product.p_image.url }}" class="w-full h-full object-cover">
@@ -39,15 +49,48 @@
                     </div>
 
                     <div class="text-right flex flex-col items-end gap-3">
-                        <div class="flex items-center bg-slate-50 rounded-xl overflow-hidden border border-slate-100">
-                            <button onclick="updateQty('{{ item.id }}', 'minus')" class="px-3 py-2 hover:bg-emerald-50 text-emerald-700 transition-all border-none">-</button>
-                            <span id="qty-{{ item.id }}" class="px-4 font-bold text-sm text-[#064e3b]">{{ item.quantity }}</span>
-                            <button onclick="updateQty('{{ item.id }}', 'plus')" class="px-3 py-2 hover:bg-emerald-50 text-emerald-700 transition-all border-none">+</button>
+                        <div class="flex items-center bg-slate-50 rounded-xl
+                                    overflow-hidden border border-slate-100">
+
+                            <button type="button"
+                                    data-quantity-button
+                                    onclick="updateQty('{{ item.id }}', 'minus')"
+                                    class="px-3 py-2 hover:bg-emerald-50 text-emerald-700
+                                        transition-all border-none">
+                                −
+                            </button>
+
+                            <span id="qty-{{ item.id }}"
+                                class="px-4 font-bold text-sm text-[#064e3b]">
+                                {{ item.quantity }}
+                            </span>
+
+                            <button type="button"
+                                    data-quantity-button
+                                    onclick="updateQty('{{ item.id }}', 'plus')"
+                                    class="px-3 py-2 hover:bg-emerald-50 text-emerald-700
+                                        transition-all border-none">
+                                +
+                            </button>
                         </div>
-                        <p class="serif-title text-xl text-[#064e3b] font-bold">₹ <span id="total-{{ item.id }}">{{ item.total_price }}</span></p>
+
+                        <p class="serif-title text-xl text-[#064e3b] font-bold">
+                            ₹ <span id="total-{{ item.id }}">
+                                {{ item.total_price|floatformat:2 }}
+                            </span>
+                        </p>
                     </div>
                 </div>
                 {% endfor %}
+                <div id="cart-csrf" hidden>
+                    {% csrf_token %}
+                </div>
+
+                <p id="quantity-message"
+                role="status"
+                class="text-sm text-red-600 mt-3"
+                hidden>
+                </p>
             </div>
 
             <div class="lg:w-96">
@@ -78,21 +121,77 @@
 </div>
 
 <script>
-function updateQty(cartId, action) {
-    fetch(`/customer/update-cart-qty/?cart_id=${cartId}&action=${action}`)
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            // Use the exact keys from the Python dictionary below
-            document.getElementById(`qty-${cartId}`).innerText = data.qty;
-            document.getElementById(`total-${cartId}`).innerText = data.item_total;
-            
-            // Only update the number inside the span to avoid double symbols
-            document.getElementById('cart-subtotal').innerText = data.grand_total;
-            document.getElementById('cart-total').innerText = data.grand_total;
+let quantityUpdating = false;
+
+async function updateQty(cartId, action) {
+    if (quantityUpdating) return;
+
+    const buttons = document.querySelectorAll('[data-quantity-button]');
+    const message = document.getElementById('quantity-message');
+    const csrfToken = document.querySelector(
+        '#cart-csrf input[name="csrfmiddlewaretoken"]'
+    ).value;
+
+    quantityUpdating = true;
+    buttons.forEach(button => button.disabled = true);
+    message.hidden = true;
+
+    try {
+        const response = await fetch(
+            "{% url 'customer:update_cart_quantity' %}",
+            {
+                method: 'POST',
+                credentials: 'same-origin',
+
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+
+                body: new URLSearchParams({
+                    cart_id: cartId,
+                    action: action
+                })
+            }
+        );
+
+        // Redirect to login if the session has expired.
+        if (response.redirected) {
+            window.location.assign(response.url);
+            return;
         }
-    })
-    .catch(error => console.error('Error:', error));
+
+        const contentType = response.headers.get('content-type') || '';
+
+        if (!contentType.includes('application/json')) {
+            throw new Error(
+                'Unable to update quantity. Reload the page and try again.'
+            );
+        }
+
+        const data = await response.json();
+
+        if (!response.ok || data.status !== 'success') {
+            throw new Error(data.message || 'Unable to update quantity.');
+        }
+
+        document.getElementById(`qty-${cartId}`).textContent = data.qty;
+        document.getElementById(`total-${cartId}`).textContent = data.item_total;
+
+        const subtotal = document.getElementById('cart-subtotal');
+        const total = document.getElementById('cart-total');
+
+        if (subtotal) subtotal.textContent = data.grand_total;
+        if (total) total.textContent = data.grand_total;
+
+    } catch (error) {
+        message.textContent = error.message;
+        message.hidden = false;
+
+    } finally {
+        quantityUpdating = false;
+        buttons.forEach(button => button.disabled = false);
+    }
 }
 </script>
 {% endblock %}

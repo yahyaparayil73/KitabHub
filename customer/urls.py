@@ -21,8 +21,13 @@ urlpatterns=[
     path('checkout/', views.checkout, name='checkout'),
     path('place_order/', views.place_order, name='place_order'),
     path('payment-verify/', views.payment_verify, name='payment_verify'),
-    # path('payment-failed/', views.payment_failed, name='payment_failed'),
+
     path('order-success/<str:order_id>/', views.order_success, name='order_success'),
+    path('payment/<str:order_id>/', views.payment, name='payment'),
+    path('payment-status/<str:order_id>/', views.payment_status, name='payment_status'),
+    path('check-payment/<str:order_id>/', views.check_payment, name='check_payment'),
+    path('cancel-checkout/<str:order_id>/', views.cancel_checkout, name='cancel_checkout'),
+    path('razorpay/webhook/', views.razorpay_webhook, name='razorpay_webhook'),
     path("api/books/",api_views.book_list,name="api_book_list"),
 
 ]

@@ -24,11 +24,8 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 
 
-# Replace with your ACTUAL keys from the Razorpay Dashboard
-RAZORPAY_KEY_ID = 'rzp_test_SkKtChnzWjXzue'
-RAZORPAY_KEY_SECRET = 'AfS2aXar5hfwT3QZ7fkiXlMR'
 
-client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+
 
 @auth_customer
 def customer_home(request):
@@ -38,7 +35,7 @@ def customer_home(request):
     # 2. Session Security Check
     customer_id = request.session.get('customer')
     if not customer_id:
-        return redirect('customer:login')
+        return redirect('common:customer_login')
     
     
     # 3. Secure Customer Retrieval
@@ -48,10 +45,9 @@ def customer_home(request):
     except Customer.DoesNotExist:
         # If session is invalid, clear it and redirect
         request.session.flush()
-        return redirect('customer:login')
+        return redirect('common:customer_login')
     
     recently_viewed_ids = request.session.get('recently_viewed', [])
-    print('yahyaparayil')
     recently_viewed_products = []
 
     if recently_viewed_ids:
@@ -92,88 +88,11 @@ def search_books(request):
         results = []
     return JsonResponse({"results": results})
 
-@auth_customer
-def add_to_cart(request, pid):
-    
-    customer_id = request.session['customer']
-    product = get_object_or_404(Product, id=pid)
-    exists = Cart.objects.filter(customer_id=customer_id, product_id=pid).exists()
-    
-    if exists:
-        messages.info(request, "This volume is already in your selection.")
-        return redirect('customer:view_cart') # Go straight to cart if already there
-    
-    Cart.objects.create(customer_id=customer_id, product_id=pid, quantity=1)
-    messages.success(request, "Archive updated: Volume added to selections.")
-    return redirect('customer:view_cart')
-
-@auth_customer
-def view_cart(request):
-    
-    cart_items = Cart.objects.filter(customer_id=request.session['customer'])
-    grand_total = sum(item.total_price for item in cart_items)
-    
-    return render(request, 'customer/my cart.html', {
-        'cart_items': cart_items,
-        'grand_total': grand_total
-    })
-
-@auth_customer
-def update_cart_quantity(request):
-    # This handles the AJAX real-time updates
-    cart_id = request.GET.get('cart_id')
-    action = request.GET.get('action')
-    item = get_object_or_404(Cart, id=cart_id)
-    
-    if action == 'plus':
-        item.quantity += 1
-    elif action == 'minus' and item.quantity > 1:
-        item.quantity -= 1
-    
-    item.save()
-    return JsonResponse({
-        'status': 'success',
-        'qty': item.quantity,
-        'item_total': item.total_price,
-        'grand_total': sum(i.total_price for i in Cart.objects.filter(customer=item.customer))
-    })
-
-def remove_from_cart(request, cart_id):
-    # Security: Ensure the item belongs to the logged-in customer
-    if 'customer' not in request.session:
-        return redirect('common:customer_login')
-        
-    item = get_object_or_404(Cart, id=cart_id, customer_id=request.session['customer'])
-    product_name = item.product.p_name # Store name for the success message
-    item.delete()
-    
-    messages.success(request, f"'{product_name}' has been removed from your archive.")
-    return redirect('customer:view_cart')
 
 
-@auth_customer
-def customer_myorders(request):
-    customer_id = request.session['customer']
 
-    orders = Order.objects.filter(
-        customer_id=customer_id,
-        is_paid=True
-    ).order_by('-created_at')
 
-    for order in orders:
-        order.purchased_items = order.items.all()
-        order.total_quantity = 0
-        order.books_subtotal = Decimal('0.00')
 
-        for item in order.purchased_items:
-            item.line_total = item.price_at_purchase * item.quantity
-
-            order.total_quantity += item.quantity
-            order.books_subtotal += item.line_total
-
-    return render(request, 'customer/my orders.html', {
-        'orders': orders
-    })
 
 @auth_customer
 def product_details(request, pid):
@@ -182,7 +101,6 @@ def product_details(request, pid):
     
     # Check if the product is already in the user's cart
     is_in_cart = False
-    print('yahya')
     if 'customer' in request.session:
         is_in_cart = Cart.objects.filter(
             customer_id=request.session['customer'], 
@@ -247,7 +165,6 @@ def customer_changepassword(request):
 
 @auth_customer
 def customer_profile(request):
-    print('yahya parayil')
     customer = Customer.objects.get(id=request.session['customer'])
     return render(request, 'customer/customer_profile.html', {'customer_profile': customer})
 
@@ -283,7 +200,6 @@ def cust_view_prod(request):
 def master_customer(request):
     customer = Customer.objects.get(id=request.session['customer'])
     cust_nm = customer.c_name
-    print(customer)
     # count = Cart_items.objects.count()
     return render(request, 'customer/master_customer.html')
 
@@ -307,127 +223,9 @@ def customer_logout(request):
         
     return redirect('common:customer_login')
 
-def checkout(request):
-    customer_id = request.session.get('customer')
 
-    customer_profile = Customer.objects.get(id=customer_id)
-    cart_items = Cart.objects.filter(customer_id=customer_id)
-
-    if not cart_items.exists():
-        messages.warning(request, "Your cart is empty.")
-        return redirect('customer:view_cart')
-
-    grand_total = sum(item.total_price for item in cart_items)
-
-    return render(request, 'customer/checkout.html', {
-        'cart_items': cart_items,
-        'grand_total': grand_total,
-        'profile': customer_profile
-    })
-
-def place_order(request):
-
-    if request.method != 'POST':
-        return redirect('customer:checkout')
-
-    customer_id = request.session.get('customer')
-
-    cart_items = Cart.objects.filter(customer_id=customer_id)
-
-    if not cart_items.exists():
-        messages.warning(request, "Your cart is empty.")
-        return redirect('customer:view_cart')
-
-    grand_total = sum(
-        (item.total_price for item in cart_items),
-        Decimal("0.00")
-    )
-
-    amount_paise = int(grand_total * 100)
-
-    try:
-
-        # Create Razorpay order
-        razor_order = client.order.create({
-            "amount": amount_paise,
-            "currency": "INR",
-            "payment_capture": 1
-        })
-
-        # Create our database order as PENDING
-        new_order = Order.objects.create(
-            customer_id=customer_id,
-            full_name=request.POST.get('full_name'),
-            email=request.POST.get('email'),
-            shipping_address=request.POST.get('address'),
-            total_amount=grand_total,
-            razorpay_order_id=razor_order['id'],
-            status='Pending',
-            is_paid=False
-        )
-        print(f'order placed')
-
-        return render(request, 'customer/payment.html', {
-            'order': new_order,
-            'razorpay_order_id': razor_order['id'],
-            'razorpay_key': RAZORPAY_KEY_ID,
-            'amount': amount_paise
-        })
-
-    except Exception as e:
-
-        print(f"Error initializing payment: {e}")
-
-        messages.error(
-            request,
-            "Unable to initialize payment. Please try again."
-        )
-
-        return redirect('customer:checkout')
     
-#5180 2872 0009 1001 -  razor pay dummy card        
-def payment_verify(request):
-    order_id = request.GET.get('order_id')
-    payment_id = request.GET.get('payment_id')
-    signature = request.GET.get('signature')
-
-    try:
-        order = Order.objects.get(order_id=order_id)
         
-        # Verify the signature cryptographically
-        client.utility.verify_payment_signature({
-            'razorpay_order_id': order.razorpay_order_id,
-            'razorpay_payment_id': payment_id,
-            'razorpay_signature': signature
-        })
-
-        # SUCCESS: Finalize the Order
-        with transaction.atomic():
-            order.is_paid = True
-            order.status = 'Paid'
-            order.razorpay_payment_id = payment_id
-            order.save()
-
-            # Move cart items to OrderItems and reduce stock
-            cart_items = Cart.objects.filter(customer=order.customer)
-            for item in cart_items:
-                OrderItem.objects.create(
-                    order=order,
-                    product=item.product,
-                    quantity=item.quantity,
-                    price_at_purchase=item.product.p_price
-                )
-                item.product.p_stock -= item.quantity
-                item.product.save()
-
-            # Clear the cart
-            cart_items.delete()
-            print('test')
-
-        return redirect('customer:order_success', order_id=order.order_id)
-
-    except Exception:
-        return render(request, 'customer/payment_failed.html')
 
 
 # def payment_failed(request):
@@ -438,30 +236,303 @@ def payment_verify(request):
 #     )
 #     return redirect('customer:myorders')
 
+
+import json
+import uuid
+import logging
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from .forms import CheckoutForm
+from . import checkout_service as payments
+
+logger = logging.getLogger(__name__)
+
+# Cart writes are POST requests and always restricted to the session customer.
+@auth_customer
+@require_POST
+def add_to_cart(request, pid):
+    customer_id = request.session['customer']
+    with transaction.atomic():
+        Customer.objects.select_for_update().get(pk=customer_id)
+        product = get_object_or_404(Product, pk=pid)
+        if product.p_stock < 1:
+            messages.warning(request, 'This book is currently out of stock.')
+        elif Cart.objects.filter(customer_id=customer_id, product_id=pid).exists():
+            messages.info(request, 'This book is already in your cart.')
+        else:
+            Cart.objects.create(customer_id=customer_id, product=product, quantity=1)
+            messages.success(request, 'Book added to your cart.')
+    return redirect('customer:view_cart')
+
+
+@auth_customer
+def view_cart(request):
+    customer_id = request.session['customer']
+    payments.expire_reservations(customer_id)
+    items = list(Cart.objects.filter(customer_id=customer_id).select_related('product').order_by('pk'))
+    return render(request, 'customer/my cart.html', {
+        'cart_items': items,
+        'grand_total': sum((item.total_price for item in items), Decimal('0.00')),
+    })
+
+
+@auth_customer
+@require_POST
+def update_cart_quantity(request):
+    customer_id = request.session['customer']
+    try:
+        cart_id = int(request.POST.get('cart_id', ''))
+    except (TypeError, ValueError):
+        return JsonResponse({'status': 'error', 'message': 'Invalid cart item.'}, status=400)
+    action = request.POST.get('action')
+    if action not in ['plus', 'minus']:
+        return JsonResponse({'status': 'error', 'message': 'Invalid quantity action.'}, status=400)
+    with transaction.atomic():
+        Customer.objects.select_for_update().get(pk=customer_id)
+        item = get_object_or_404(Cart.objects.select_related('product'), pk=cart_id, customer_id=customer_id)
+        quantity = item.quantity + (1 if action == 'plus' else -1)
+        if quantity < 1:
+            return JsonResponse({'status': 'error', 'message': 'Minimum quantity is one.'}, status=400)
+        if action == 'plus' and quantity > item.product.p_stock:
+            return JsonResponse({'status': 'error', 'message': 'Not enough available stock. An active checkout may be reserving copies.'}, status=409)
+        item.quantity = quantity
+        item.save(update_fields=['quantity', 'updated_at'])
+        total = sum((row.total_price for row in Cart.objects.filter(customer_id=customer_id).select_related('product')), Decimal('0.00'))
+    return JsonResponse({
+        'status': 'success', 'qty': item.quantity,
+        'item_total': f'{item.total_price:.2f}', 'grand_total': f'{total:.2f}',
+    })
+
+
+@auth_customer
+@require_POST
+def remove_from_cart(request, cart_id):
+    with transaction.atomic():
+        Customer.objects.select_for_update().get(pk=request.session['customer'])
+        item = get_object_or_404(Cart, pk=cart_id, customer_id=request.session['customer'])
+        item.delete()
+    messages.success(request, 'Book removed from your cart.')
+    return redirect('customer:view_cart')
+
+
+def _checkout_context(request, form):
+    items = list(Cart.objects.filter(customer_id=request.session['customer']).select_related('product'))
+    return {
+        'form': form, 'cart_items': items,
+        'grand_total': sum((item.total_price for item in items), Decimal('0.00')),
+        'profile': get_object_or_404(Customer, pk=request.session['customer']),
+    }
+
+
+@auth_customer
+def checkout(request):
+    payments.expire_reservations(request.session['customer'])
+    # A token identifies a single form submission, including a repeated POST.
+    token = str(uuid.uuid4())
+    request.session['checkout_token'] = token
+    profile = get_object_or_404(Customer, pk=request.session['customer'])
+    form = CheckoutForm(initial={
+        'checkout_token': token, 'full_name': profile.c_name,
+        'email': profile.c_email, 'address': getattr(profile, 'c_address', ''),
+    })
+    context = _checkout_context(request, form)
+    if not context['cart_items']:
+        messages.warning(request, 'Your cart is empty.')
+        return redirect('customer:view_cart')
+    return render(request, 'customer/checkout.html', context)
+
+
+@auth_customer
+@require_POST
+def place_order(request):
+    form = CheckoutForm(request.POST)
+    if not form.is_valid():
+        return render(request, 'customer/checkout.html', _checkout_context(request, form), status=400)
+    # Existing owned tokens are safe to replay even if another tab opened checkout.
+    token = form.cleaned_data['checkout_token']
+    existing = Order.objects.filter(customer_id=request.session['customer'], checkout_token=token).first()
+    if existing:
+        return _order_destination(existing)
+    if str(token) != request.session.get('checkout_token'):
+        form.add_error(None, 'This checkout form has expired. Reload checkout and try again.')
+        return render(request, 'customer/checkout.html', _checkout_context(request, form), status=400)
+    try:
+        order, created = payments.create_checkout(request.session['customer'], form.cleaned_data)
+    except payments.CheckoutProblem as error:
+        form.add_error(None, str(error))
+        return render(request, 'customer/checkout.html', _checkout_context(request, form), status=409)
+    if created:
+        order = payments.initialize_gateway(order)
+    return _order_destination(order)
+
+
+def _order_destination(order):
+    if order.is_paid and order.payment_status != 'Review':
+        return redirect('customer:order_success', order_id=order.order_id)
+    if order.payment_status == 'Pending' and order.razorpay_order_id:
+        return redirect('customer:payment', order_id=order.order_id)
+    return redirect('customer:payment', order_id=order.order_id)
+
+
+def _owned_order(request, order_id):
+    return get_object_or_404(Order, order_id=order_id, customer_id=request.session['customer'])
+
+
+@auth_customer
+def payment(request, order_id):
+    payments.expire_reservations(request.session['customer'])
+    order = _owned_order(request, order_id)
+    if order.is_paid or order.payment_status != 'Pending' or not order.razorpay_order_id:
+        return _order_destination(order)
+    return render(request, 'customer/payment.html', {
+        'order': order,
+        'payment_options': {
+            'key': settings.RAZORPAY_KEY_ID, 'amount': payments.amount_paise(order),
+            'currency': 'INR', 'name': 'KitabHub', 'order_id': order.razorpay_order_id,
+            'prefill': {'name': order.full_name, 'email': order.email},
+            'theme': {'color': '#064e3b'},
+        },
+    })
+
+
+@auth_customer
+@require_POST
+def payment_verify(request):
+    order = _owned_order(request, request.POST.get('order_id', ''))
+    payment_id = request.POST.get('razorpay_payment_id', '')
+    signature = request.POST.get('razorpay_signature', '')
+    returned_order_id = request.POST.get('razorpay_order_id', '')
+    if not payment_id or not signature or returned_order_id != order.razorpay_order_id:
+        return render(request, 'customer/payment_failed.html', {'order': order}, status=400)
+    try:
+        client = payments.get_client()
+        client.utility.verify_payment_signature({
+            'razorpay_order_id': order.razorpay_order_id,
+            'razorpay_payment_id': payment_id, 'razorpay_signature': signature,
+        })
+    except razorpay.errors.SignatureVerificationError:
+        logger.warning('Invalid checkout signature for local order %s', order.pk)
+        return render(request, 'customer/payment_failed.html', {'order': order}, status=400)
+    try:
+        verified_payment = client.payment.fetch(payment_id)
+    except Exception:
+        # Gateway connectivity is uncertain; do not call a paid customer a failure.
+        logger.exception('Cannot fetch payment for local order %s', order.pk)
+        messages.info(request, 'We are still confirming payment. Please do not pay again.')
+        return redirect('customer:payment_status', order_id=order.order_id)
+    try:
+        order = payments.record_captured_payment(order.razorpay_order_id, verified_payment)
+    except payments.PaymentMismatch:
+        logger.exception('Payment mismatch for local order %s', order.pk)
+        return render(request, 'customer/payment_failed.html', {'order': order}, status=400)
+    if not order.is_paid:
+        return redirect('customer:payment_status', order_id=order.order_id)
+    return _order_destination(order)
+
+
+@auth_customer
+def payment_status(request, order_id):
+    payments.expire_reservations(request.session['customer'])
+    order = _owned_order(request, order_id)
+    if order.is_paid and order.payment_status != 'Review':
+        return redirect('customer:order_success', order_id=order.order_id)
+    return render(request, 'customer/payment_status.html', {'order': order})
+
+
+@auth_customer
+@require_POST
+def check_payment(request, order_id):
+    order = _owned_order(request, order_id)
+    try:
+        order = payments.reconcile_order(order)
+    except (payments.PaymentMismatch, razorpay.errors.BadRequestError):
+        logger.exception('Unable to match payment for local order %s', order.pk)
+        messages.warning(request, 'We could not confirm this payment. Please contact support with your order number.')
+    except Exception:
+        logger.exception('Payment status lookup unavailable for local order %s', order.pk)
+        messages.info(request, 'Payment status is temporarily unavailable. Do not pay again if money was deducted.')
+    return _order_destination(order) if order.is_paid else redirect('customer:payment_status', order_id=order.order_id)
+
+
+@auth_customer
+@require_POST
+def cancel_checkout(request, order_id):
+    order = _owned_order(request, order_id)
+    # Try to recover an already-captured payment before releasing the reservation.
+    try:
+        order = payments.reconcile_order(order)
+    except Exception:
+        logger.exception('Cannot check payment before cancelling order %s', order.pk)
+        messages.warning(request, 'Payment status could not be checked. Please try again before starting another payment.')
+        return redirect('customer:payment_status', order_id=order.order_id)
+    if order.is_paid:
+        return _order_destination(order)
+    payments.release_checkout(order)
+    messages.info(request, 'Checkout closed. Your cart has been kept. Any late payment will still be reconciled.')
+    return redirect('customer:view_cart')
+
+
+@csrf_exempt
+@require_POST
+def razorpay_webhook(request):
+    secret = getattr(settings, 'RAZORPAY_WEBHOOK_SECRET', '')
+    if not secret:
+        return HttpResponse('Webhook is not configured.', status=503)
+    try:
+        # Use the exact raw body, not json.dumps() of the parsed payload.
+        body = request.body.decode('utf-8')
+        razorpay.Utility().verify_webhook_signature(
+            body, request.headers.get('X-Razorpay-Signature', ''), secret,
+        )
+        event = json.loads(body)
+    except (razorpay.errors.SignatureVerificationError, ValueError, UnicodeDecodeError):
+        return HttpResponse('Invalid webhook.', status=400)
+    if event.get('event') not in ['payment.captured', 'order.paid']:
+        return HttpResponse('Ignored.')
+    payment_data = event.get('payload', {}).get('payment', {}).get('entity', {})
+    if not isinstance(payment_data, dict) or not payment_data.get('order_id'):
+        return HttpResponse('Invalid payment event.', status=400)
+    try:
+        payments.record_captured_payment(payment_data['order_id'], payment_data)
+    except Order.DoesNotExist:
+        logger.error('Captured webhook has no linked local order; manual reconciliation required.')
+        return HttpResponse('Order not linked yet.', status=503)
+    except payments.PaymentMismatch:
+        logger.exception('Webhook payment mismatch.')
+        return HttpResponse('Payment mismatch.', status=400)
+    return HttpResponse('OK')
+
+
+def _display_order(order):
+    items = list(order.items.select_related('product').order_by('pk'))
+    order.purchased_items = items
+    order.total_quantity = sum(item.quantity for item in items)
+    order.books_subtotal = sum((item.line_total for item in items), Decimal('0.00'))
+    return items
+
+
 @auth_customer
 def order_success(request, order_id):
-    customer_id = request.session['customer']
-    print('hanna')
-
-    order = get_object_or_404(
-        Order,
-        order_id=order_id,
-        customer_id=customer_id,
-        is_paid=True,
-    )
-
-    order_items = order.items.all()
-    total_quantity = 0
-    books_subtotal = Decimal('0.00')
-
-    for item in order_items:
-        item.line_total = item.price_at_purchase * item.quantity
-        total_quantity += item.quantity
-        books_subtotal += item.line_total
-
+    order = _owned_order(request, order_id)
+    if not order.is_paid or order.payment_status == 'Review':
+        return redirect('customer:payment_status', order_id=order.order_id)
+    items = _display_order(order)
     return render(request, 'customer/order_success.html', {
-        'order': order,
-        'order_items': order_items,
-        'total_quantity': total_quantity,
-        'books_subtotal': books_subtotal,
+        'order': order, 'order_items': items,
+        'total_quantity': order.total_quantity, 'books_subtotal': order.books_subtotal,
+    })
+
+
+@auth_customer
+def customer_myorders(request):
+    orders = list(Order.objects.filter(
+        customer_id=request.session['customer'], is_paid=True,
+    ).order_by('-created_at', '-pk'))
+    for order in orders:
+        _display_order(order)
+    pending_orders = Order.objects.filter(
+        customer_id=request.session['customer'], is_paid=False,
+    ).exclude(razorpay_order_id__isnull=True).exclude(razorpay_order_id='').order_by('-created_at')[:10]
+    return render(request, 'customer/my orders.html', {
+        'orders': orders, 'pending_orders': pending_orders,
     })

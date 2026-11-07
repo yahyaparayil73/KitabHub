@@ -8,6 +8,27 @@
 
     <form method="POST" action="{% url 'customer:place_order' %}" class="grid grid-cols-12 gap-16">
         {% csrf_token %}
+        {{ form.checkout_token }}
+
+        {% if form.errors %}
+        <div role="alert"
+            class="col-span-12 p-4 rounded-xl bg-red-50 text-red-700 text-sm">
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <p>{{ field.label }}: {{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% for message in messages %}
+        <div role="status"
+            class="col-span-12 p-4 rounded-xl bg-amber-50 text-amber-800 text-sm">
+            {{ message }}
+        </div>
+        {% endfor %}
         
         <div class="col-span-12 lg:col-span-7 space-y-12">
             <div>
@@ -50,7 +71,7 @@
                         <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white">
                             <i class="bi bi-wallet2 text-lg"></i>
                         </div>
-                        <p class="text-sm font-bold text-emerald-900">Cash on Delivery</p>
+                        <p class="text-sm font-bold text-emerald-900">Secure Online Payment · Razorpay</p>
                     </div>
                     <span class="text-[9px] font-black uppercase text-emerald-600 tracking-widest">Active</span>
                 </div>
@@ -94,7 +115,7 @@
                 </div>
 
                 <button type="submit" class="w-full bg-emerald-500 text-white py-5 rounded-2xl font-black uppercase tracking-[3px] text-[10px] mt-10 hover:bg-white hover:text-slate-900 transition-all duration-500 relative z-10 shadow-xl shadow-emerald-500/20">
-                    Confirm Order Placement
+                    Continue to Payment
                 </button>
 
                 <i class="bi bi-book-half absolute -bottom-10 -right-10 text-white/5 text-[150px] rotate-12"></i>
