@@ -30,11 +30,15 @@ class PaymentMismatch(Exception):
 
 
 def get_client():
-    key = getattr(settings, 'RAZORPAY_KEY_ID', '')
-    secret = getattr(settings, 'RAZORPAY_KEY_SECRET', '')
-    if not key or not secret:
-        raise ImproperlyConfigured('Configure the Razorpay key ID and secret in settings.')
-    return razorpay.Client(auth=(key, secret))
+    key_id = settings.RAZORPAY_KEY_ID
+    key_secret = settings.RAZORPAY_KEY_SECRET
+
+    if not key_id or not key_secret:
+        raise ImproperlyConfigured(
+            "Configure the Razorpay key ID and secret in settings."
+        )
+
+    return razorpay.Client(auth=(key_id, key_secret))
 
 
 def amount_paise(order):
