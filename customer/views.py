@@ -242,6 +242,7 @@ import uuid
 import logging
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.cache import never_cache
 from .forms import CheckoutForm
 from . import checkout_service as payments
 
@@ -293,7 +294,15 @@ def update_cart_quantity(request):
         quantity = item.quantity + (1 if action == 'plus' else -1)
         if quantity < 1:
             return JsonResponse({'status': 'error', 'message': 'Minimum quantity is one.'}, status=400)
-        if action == 'plus' and quantity > item.product.p_stock:
+        # Available stock excludes this customer's existing reservations.
+        # Count those copies too; the next checkout releases/re-reserves them.
+        reserved = sum(OrderItem.objects.filter(
+            order__customer_id=customer_id, order__is_paid=False,
+            order__stock_reserved=True,
+            order__payment_status__in=['Initializing', 'Pending'],
+            product_id=item.product_id,
+        ).values_list('quantity', flat=True))
+        if action == 'plus' and quantity > item.product.p_stock + reserved:
             return JsonResponse({'status': 'error', 'message': 'Not enough available stock. An active checkout may be reserving copies.'}, status=409)
         item.quantity = quantity
         item.save(update_fields=['quantity', 'updated_at'])
@@ -325,6 +334,7 @@ def _checkout_context(request, form):
 
 
 @auth_customer
+@never_cache
 def checkout(request):
     payments.expire_reservations(request.session['customer'])
     # A token identifies a single form submission, including a repeated POST.
@@ -348,12 +358,10 @@ def place_order(request):
     form = CheckoutForm(request.POST)
     if not form.is_valid():
         return render(request, 'customer/checkout.html', _checkout_context(request, form), status=400)
-    # Existing owned tokens are safe to replay even if another tab opened checkout.
+    # Owned tokens may be replayed, but the service must still check the cart.
     token = form.cleaned_data['checkout_token']
     existing = Order.objects.filter(customer_id=request.session['customer'], checkout_token=token).first()
-    if existing:
-        return _order_destination(existing)
-    if str(token) != request.session.get('checkout_token'):
+    if not existing and str(token) != request.session.get('checkout_token'):
         form.add_error(None, 'This checkout form has expired. Reload checkout and try again.')
         return render(request, 'customer/checkout.html', _checkout_context(request, form), status=400)
     try:
@@ -371,7 +379,7 @@ def _order_destination(order):
         return redirect('customer:order_success', order_id=order.order_id)
     if order.payment_status == 'Pending' and order.razorpay_order_id:
         return redirect('customer:payment', order_id=order.order_id)
-    return redirect('customer:payment', order_id=order.order_id)
+    return redirect('customer:payment_status', order_id=order.order_id)
 
 
 def _owned_order(request, order_id):
@@ -379,11 +387,15 @@ def _owned_order(request, order_id):
 
 
 @auth_customer
+@never_cache
 def payment(request, order_id):
     payments.expire_reservations(request.session['customer'])
     order = _owned_order(request, order_id)
     if order.is_paid or order.payment_status != 'Pending' or not order.razorpay_order_id:
         return _order_destination(order)
+    if not payments.checkout_matches_cart(order):
+        messages.info(request, 'Your cart has changed. Please confirm the updated checkout.')
+        return redirect('customer:checkout')
     return render(request, 'customer/payment.html', {
         'order': order,
         'payment_options': {

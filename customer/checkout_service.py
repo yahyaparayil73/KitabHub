@@ -96,25 +96,108 @@ def expire_reservations(customer_id=None, limit=100):
     return released
 
 
+def checkout_matches_cart(order, rows=None, data=None):
+    """Compare the frozen purchase with the current cart, not just its total."""
+    if rows is None:
+        rows = list(Cart.objects.filter(customer_id=order.customer_id)
+                    .select_related('product').order_by('pk'))
+    items = list(order.items.all())
+    current = {
+        row.pk: (row.product_id, row.quantity, Decimal(str(row.product.p_price)),
+                 row.updated_at)
+        for row in rows
+    }
+    frozen = {
+        item.source_cart_id: (item.product_id, item.quantity,
+                              item.price_at_purchase, item.source_cart_updated_at)
+        for item in items
+    }
+    if not rows or len(items) != len(rows) or current != frozen:
+        return False
+    if sum((row.total_price for row in rows), Decimal('0.00')) != order.total_amount:
+        return False
+    return data is None or (
+        order.full_name == data['full_name'] and order.email == data['email']
+        and order.shipping_address == data['address']
+    )
+
+
+def _check_replacement_payment(order):
+    """Check Razorpay outside locks before replacing an unpaid reservation."""
+    if not order.razorpay_order_id:
+        raise CheckoutProblem('Payment is still being prepared. Please retry shortly.')
+    try:
+        result = get_client().order.payments(order.razorpay_order_id)
+        payments = result.get('items', [])
+        for payment in payments:
+            if payment.get('status') == 'captured':
+                return record_captured_payment(order.razorpay_order_id, payment)
+        if result.get('count', len(payments)) > len(payments):
+            raise CheckoutProblem('Earlier payment history is incomplete. Please check its status before retrying.')
+        if any(payment.get('status') not in ['failed', 'refunded'] for payment in payments):
+            raise CheckoutProblem(
+                'An earlier payment is still processing. Please check its status before paying again.'
+            )
+    except CheckoutProblem:
+        raise
+    except Exception as error:
+        logger.exception('Cannot check earlier checkout %s before replacement', order.pk)
+        raise CheckoutProblem(
+            'We could not check your earlier payment. Please retry; do not pay again if money was deducted.'
+        ) from error
+    order.refresh_from_db()
+    return order
+
+
 def create_checkout(customer_id, data):
     """Freeze books/prices, reserve stock and create exactly one local attempt."""
     expire_reservations(customer_id)
+    # Network requests must stay outside transaction.atomic(). Recheck these
+    # exact attempts under the customer lock before releasing any stock.
+    checked = set()
+    rows = list(Cart.objects.filter(customer_id=customer_id).select_related('product'))
+    candidates = Order.objects.filter(
+        customer_id=customer_id, is_paid=False,
+        payment_status__in=['Initializing', 'Pending'],
+        reservation_expires_at__gt=timezone.now(),
+    ).order_by('pk')
+    for candidate in candidates:
+        if not checkout_matches_cart(candidate, rows, data):
+            candidate = _check_replacement_payment(candidate)
+            if candidate.is_paid:
+                return candidate, False
+            checked.add(candidate.pk)
     with transaction.atomic():
         Customer.objects.select_for_update().get(pk=customer_id)
+        rows = list(Cart.objects.filter(customer_id=customer_id).select_related('product').order_by('pk'))
         existing = Order.objects.filter(
             customer_id=customer_id, checkout_token=data['checkout_token'],
         ).first()
         if existing:
-            return existing, False
-        active = Order.objects.filter(
+            if existing.is_paid:
+                return existing, False
+            if (existing.payment_status in ['Initializing', 'Pending']
+                    and existing.reservation_expires_at
+                    and existing.reservation_expires_at > timezone.now()
+                    and checkout_matches_cart(existing, rows, data)):
+                return existing, False
+            raise CheckoutProblem('This checkout form is outdated. Reload checkout and submit again.')
+        active_orders = list(Order.objects.select_for_update().filter(
             customer_id=customer_id,
+            is_paid=False,
             payment_status__in=['Initializing', 'Pending'],
             reservation_expires_at__gt=timezone.now(),
-        ).first()
-        if active:
-            return active, False
+        ).order_by('pk'))
+        for active in active_orders:
+            if checkout_matches_cart(active, rows, data):
+                return active, False
+        for active in active_orders:
+            if active.pk not in checked:
+                raise CheckoutProblem('Your checkout changed in another tab. Please retry.')
+            _release(active)
+            active.payment_status = 'Expired'
+            active.save(update_fields=['stock_reserved', 'payment_status'])
 
-        rows = list(Cart.objects.filter(customer_id=customer_id).select_related('product').order_by('pk'))
         if not rows:
             raise CheckoutProblem('Your cart is empty.')
         total = Decimal('0.00')
