@@ -47,6 +47,7 @@ def amount_paise(order):
     value = order.total_amount * 100
     if value != value.to_integral_value():
         raise CheckoutProblem('Order prices must use two decimal places.')
+    print('yahya')
     return int(value)
 
 
